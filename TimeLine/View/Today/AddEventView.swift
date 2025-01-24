@@ -8,14 +8,14 @@
 import SwiftUI
 
 struct AddEventView: View {
-  @State var event: Event
+  @State var event: Event = Event(title: "", details: "", eventType: .study, createdTime: .now)
   @State private var hasTime: Bool = false
 
   var body: some View {
     Form {
       Section(header: Text("Event Detail")) {
         HStack(alignment: .top) {
-          Label("Title", systemImage: "person.fill")
+          Label("Title", systemImage: "note.text")
           TextField("Enter title", text: $event.title)
             .lineLimit(3...5)
         }
@@ -38,7 +38,7 @@ struct AddEventView: View {
         HStack {
           Label("Event Type", systemImage: "list.bullet")
           Picker("", selection: $event.eventType) {
-            ForEach(EventType.allCases, id: \.self) { eventType in
+            ForEach(Event.allEventType, id: \.id) { eventType in
               Text(eventType.name).tag(eventType)
             }
           }
@@ -79,10 +79,17 @@ struct AddEventView: View {
       
       
       Section("SubEvent") {
-        List(event.subEvents) { subEvent in
+        Button {
+          event.subEvents.append(Event(title: "New SubEvent", details: "", eventType: .study, createdTime: .now))
+        } label: {
+          Label(event.subEvents.isEmpty ? "New SubEvent" : "Add SubEvent", systemImage: "plus")
+        }
+        
+        ForEach(event.subEvents) { subEvent in
           Text(subEvent.title)
-        }//add subEvent
-          
+        }.onDelete { indexSet in
+          event.subEvents.remove(atOffsets: indexSet)
+        }
       }
     }
   }
@@ -91,6 +98,6 @@ struct AddEventView: View {
 #Preview{
   let demo = Event(
     title: "Join to part", details: "aidbaibdabdajbdasjdbjakdjbkasbdk", eventType: .finance,
-    createdTime: .now, startTime: nil, endTime: nil, durationTime: 20)
+    createdTime: .now, startTime: nil, endTime: nil)
   AddEventView(event: demo)
 }

@@ -9,6 +9,8 @@ import SwiftUI
 
 struct TodayView: View {
   @State var isAdd = false
+  @State var events: [Event] = Event.demoEvents
+  
   var body: some View {
     ZStack(alignment: .top) {
       ToolBarView().padding(.horizontal)
@@ -27,8 +29,8 @@ struct TodayView: View {
 
       ZStack(alignment: .bottom) {
         // TimeLine Main View
-        TimeLineMainView().padding(.horizontal)
-
+//        TimeLineMainView().padding(.horizontal)
+        TimeLineMainView(events: events)
         // Add Button
         HStack {
           Spacer()
@@ -45,10 +47,7 @@ struct TodayView: View {
         }.padding(20)
       }.zIndex(-1)
         .sheet(isPresented: $isAdd) {
-          var event = Event(
-            title: "Join to part", details: "aidbaibdabdajbdasjdbjakdjbkasbdk", eventType: .finance,
-            createdTime: .now, startTime: nil, endTime: nil, durationTime: 20)
-          AddEventView(event: event)
+          AddEventView()
         }
 
     }
@@ -87,9 +86,9 @@ struct ToolBarView: View {
       }
       .contextMenu {
         Section("Quick Filter") {
-          Button("Filter By Type", systemImage: "circle", action: {})
-          Button("Filter By Time", systemImage: "circle", action: {})
-          Button("Filter By Priority", systemImage: "circle", action: {})
+          Button("Filter By Type", systemImage: "list.bullet.indent", action: {})
+          Button("Filter By Time", systemImage: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", action: {})
+          Button("Filter By Priority", systemImage: "flame", action: {})
         }
       }
       // tap animation

@@ -13,7 +13,7 @@ struct HomeView: View {
     var body: some View {
         TabView {
             Tab {
-                NavigationStack { TodayView() }
+              NavigationStack { TodayView() }
             } label: {
                 Label("Today", systemImage: "timelapse")
             }.badge(inCompletedTask ?? 0)

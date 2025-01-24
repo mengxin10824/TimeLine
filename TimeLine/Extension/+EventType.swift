@@ -20,7 +20,7 @@ extension EventType {
 
       let eventTypeName = prediction.label
 
-      return allCases.first { $0.name == eventTypeName.uppercased() }
+      return Event.allEventType.first { $0.name == eventTypeName.uppercased() }
     } catch {
       print("Error predicting event type: \(error.localizedDescription)")
       return nil

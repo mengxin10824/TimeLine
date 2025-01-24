@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 @Model
-final class EventType: Identifiable, CaseIterable, Hashable {
+final class EventType: Identifiable, Hashable {
     var id: UUID
     var name: String
     var colorHex: String
@@ -26,10 +26,6 @@ final class EventType: Identifiable, CaseIterable, Hashable {
     static let social = EventType(name: "SOCIAL", color: Color.red)
     static let finance = EventType(name: "FINANCE", color: Color.gray)
     static let creativity = EventType(name: "CREATIVITY", color: Color.pink)
-
-    static var allCases: [EventType] {
-        [study, work, fitness, life, leisure, social, finance, creativity]
-    }
 
     init(name: String, color: Color) {
         self.id = UUID()
