@@ -70,101 +70,6 @@ struct TimeLineMainView: View {
         return hours * defaultHourHeight
     }
 
-    @ViewBuilder
-    func BarView(index: Int, currentTime: Date) -> some View {
-        ZStack(alignment: .bottomTrailing) {
-            BarBackgroundView(index: index)
-            Text(currentTime.description)
-                .font(.caption)
-                .fixedSize()
-                .position(x: 50)
-        }
-    }
-
-    // MARK: - The shape of the bar
-    func BarBackgroundView(index: Int) -> some Shape {
-        if index == 0 {
-            return AnyShape(
-                UnevenRoundedRectangle(
-                    topLeadingRadius: .infinity, bottomLeadingRadius: 0, bottomTrailingRadius: 0,
-                    topTrailingRadius: .infinity, style: .continuous))
-        } else if index == events.count - 1 {
-            return AnyShape(
-                UnevenRoundedRectangle(
-                    topLeadingRadius: 0, bottomLeadingRadius: .infinity, bottomTrailingRadius: .infinity,
-                    topTrailingRadius: 0, style: .continuous))
-        } else {
-            return AnyShape(Rectangle())
-        }
-    }
-
-    // MARK: - The View of the Event
-    @ViewBuilder
-    func EventBlockView(event: Event) -> some View {
-        ZStack {
-            Circle()
-                .frame(width: 100)
-                .position()
-            VStack {
-                HStack {
-                    Spacer()
-                    VStack(alignment: .trailing) {
-                        Text(event.title)
-                            .font(.title2)
-
-                        Text(event.details)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .lineLimit(3...5)
-                    }
-                }
-                Spacer()
-                HStack {
-                    VStack {
-                        Text("Event Type")
-                            .font(.caption)
-                        Text(event.eventType.name)
-                            .font(.title3)
-                    }
-                    Spacer()
-                    VStack {
-                        Text("Priority")
-                            .font(.caption)
-                        Text("11")
-                            .font(.title3)
-                    }
-                    Spacer()
-                    VStack {
-                        Text("Event Type")
-                            .font(.caption)
-                        Text("22")
-                            .font(.title3)
-                    }
-                }
-
-                Spacer()
-                ForEach(event.subEvents) { event in
-                    Rectangle().frame(height: 1)
-                    HStack {
-                        Text(event.title)
-                        Spacer()
-                    }.padding(.vertical, 5)
-                }
-            }
-        }
-        .padding()
-        .frame(minWidth: 300, minHeight: 200)
-        .background()
-        .clipShape(RoundedRectangle(cornerRadius: 20))
-        .shadow(radius: 5)
-        .contextMenu(
-            menuItems: {
-                Label("1", systemImage: "circle")
-            },
-            preview: {
-                Text("Preview")
-            })
-    }
 
     // MARK: - The Main View
     var body: some View {
@@ -173,11 +78,11 @@ struct TimeLineMainView: View {
                 let timelineHours = Array(getTimeLineHours().enumerated())
                 ForEach(timelineHours, id: \.offset) { index, hour in
                     HStack(alignment: .top) {
-                        BarView(index: index, currentTime: hour)
+                      TimeLineMainBarView( currentTime: hour, events: $events, index: index)
                             .frame(width: 25, height: defaultHourHeight)
                         Spacer(minLength: 25)
                         ForEach(getCurrentEvent(currentTime: hour)) { event in
-                            EventBlockView(event: event)
+                          TimeLineMainEventBlockView(event: event)
                                 .frame(width: 200)
                         }
                     }

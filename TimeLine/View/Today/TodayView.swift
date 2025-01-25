@@ -28,8 +28,6 @@ struct TodayView: View {
         .background(.ultraThinMaterial)
 
       ZStack(alignment: .bottom) {
-        // TimeLine Main View
-//        TimeLineMainView().padding(.horizontal)
         TimeLineMainView(events: events)
         // Add Button
         HStack {
