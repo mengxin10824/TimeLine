@@ -8,92 +8,32 @@
 import SwiftUI
 
 struct TimeLineMainView: View {
-    @State var events: [Event]
+  @State var config = TimeLineConfiguration()
+  @State var data: TimeLineData = TimeLineData()
 
-    // Hour Height
-    let defaultHourHeight: CGFloat = 100
+  // MARK: - The Main View
 
-    // Event Block Frame
-    let defaultEventHeight: CGFloat = 200
-    let defaultEventWidth: CGFloat = 300
+  var body: some View {
+    ScrollView([.vertical]) {
+      ScrollViewReader { _ in
+        LazyVStack(alignment: .leading, spacing: 0) {
+          ForEach(config.cachedHours, id: \.self) { hour in
+            HStack(alignment: .top, spacing: 30) {
+              TimeLineMainBarView(currentTime: hour)
+                .frame(width: 25, height: config.hourHeight)
 
-    // Configure the time line
-    let calendar: Calendar = .current
-
-    // MARK: - TimeLine Hours
-    func getTimeLineHours(hours: Int = 24) -> [Date] {
-        var result: [Date] = []
-        let currentHour = calendar.date(from: calendar.dateComponents([.hour], from: .now)) ?? .now
-
-        for hour in stride(from: hours, to: 0, by: -1) {
-            let currentDate = calendar.date(byAdding: .hour, value: -hour, to: currentHour) ?? .now
-            result.append(currentDate)
-        }
-        for hour in stride(from: 0, to: hours, by: 1) {
-            let currentDate = calendar.date(byAdding: .hour, value: hour, to: currentHour) ?? .now
-            result.append(currentDate)
-        }
-        return result
-    }
-
-    // Calculate the event from current time
-    func getCurrentEvent(currentTime: Date) -> [Event] {
-        var result: [Event] = []
-        for event in events {
-            guard let startTime = event.startTime else {
-                result.append(event)
-                continue
-            }
-            if calendar.isDate(currentTime, equalTo: startTime, toGranularity: .hour) {
-                result.append(event)
-            }
-        }
-        return result
-    }
-
-    // Calculate the event block offset
-    func getEventBlockOffsetY(event: Event, currentTime: Date) -> CGFloat? {
-        guard let start = event.startTime else { return nil }
-        let components = calendar.dateComponents([.hour, .minute], from: start, to: currentTime)
-        let hours = CGFloat(components.hour ?? 0) + CGFloat(components.minute ?? 0) / 60
-        if hours <= 0 {
-            return nil
-        }
-        return hours * defaultHourHeight
-    }
-
-    // Calculate the event block height
-    func getEventBlockHeight(event: Event) -> CGFloat {
-        guard let start = event.startTime, let end = event.endTime else { return defaultEventHeight }
-        let components = calendar.dateComponents([.hour, .minute], from: start, to: end)
-        let hours = CGFloat(components.hour ?? 0) + CGFloat(components.minute ?? 0) / 60
-        return hours * defaultHourHeight
-    }
-
-
-    // MARK: - The Main View
-    var body: some View {
-        ScrollView([.horizontal, .vertical]) {
-            LazyVStack(alignment: .leading, spacing: 0) {
-                let timelineHours = Array(getTimeLineHours().enumerated())
-                ForEach(timelineHours, id: \.offset) { index, hour in
-                    HStack(alignment: .top) {
-                      TimeLineMainBarView( currentTime: hour, events: $events, index: index)
-                            .frame(width: 25, height: defaultHourHeight)
-                        Spacer(minLength: 25)
-                        ForEach(getCurrentEvent(currentTime: hour)) { event in
-                          TimeLineMainEventBlockView(event: event)
-                                .frame(width: 200)
-                        }
-                    }
+              VStack {
+                ForEach(data.getEventsByHour(for: hour), id: \.id) { event in
+                  TimeLineMainEventBlockView(event: event)
+                    .frame(width: 170, height: config.calcEventHeight(event: event))
+                    .offset(y: config.calcEventOffsetY(event: event))
                 }
+              }.frame(maxWidth: .infinity)
             }
-            .scrollIndicators(.hidden)
-            .ignoresSafeArea()
+          }
         }
-    }
+      }
+    }.scrollIndicators(.hidden).ignoresSafeArea()
+  }
 }
 
-#Preview {
-    TimeLineMainView(events: Event.demoEvents)
-}

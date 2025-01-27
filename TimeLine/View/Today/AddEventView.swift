@@ -8,12 +8,15 @@
 import SwiftUI
 
 struct AddEventView: View {
+//  @Binding var data: TimeLineData = TimeLineData()
+  
+  
   @State var event: Event = Event(title: "", details: "", eventType: .study, createdTime: .now)
   @State private var hasTime: Bool = false
 
   var body: some View {
     Form {
-      Section(header: Text("Event Detail")) {
+      Section("Event Detail") {
         HStack(alignment: .top) {
           Label("Title", systemImage: "note.text")
           TextField("Enter title", text: $event.title)
@@ -27,11 +30,12 @@ struct AddEventView: View {
           }
           TextField("Additional details", text: $event.details, prompt: Text("Required"), axis: .vertical)
             .lineLimit(5...10)
-            .onChange(of: event.details, initial: true) { _, newValue in
-                if let eventType = EventType.predictEventType(from: newValue) {
-                  event.eventType = eventType
-                }
-            }
+          // MARK: - Predict EventType
+//            .onChange(of: event.details, initial: true) { _, newValue in
+//              if let eventType = data.predictEventType(from: newValue) {
+//                  event.eventType = eventType
+//                }
+//            }
         }
 
         // Event Type Picker
@@ -95,9 +99,3 @@ struct AddEventView: View {
   }
 }
 
-#Preview{
-  let demo = Event(
-    title: "Join to part", details: "aidbaibdabdajbdasjdbjakdjbkasbdk", eventType: .finance,
-    createdTime: .now, startTime: nil, endTime: nil)
-  AddEventView(event: demo)
-}

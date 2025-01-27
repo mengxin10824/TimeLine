@@ -15,7 +15,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		87E7BAC02D3D11970050BF21 /* TimeLine */ = {
+		87511DFB2D476C6800C387ED /* TimeLine */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = TimeLine;
 			sourceTree = "<group>";
@@ -37,8 +37,8 @@
 		87E7BAB52D3D11970050BF21 = {
 			isa = PBXGroup;
 			children = (
-				87E7BAC02D3D11970050BF21 /* TimeLine */,
 				87E7BAEC2D3FC0420050BF21 /* TimeLine.app */,
+				87511DFB2D476C6800C387ED /* TimeLine */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,7 +58,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				87E7BAC02D3D11970050BF21 /* TimeLine */,
+				87511DFB2D476C6800C387ED /* TimeLine */,
 			);
 			name = TimeLine;
 			packageProductDependencies = (

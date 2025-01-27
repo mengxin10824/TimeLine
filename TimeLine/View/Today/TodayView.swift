@@ -9,8 +9,7 @@ import SwiftUI
 
 struct TodayView: View {
   @State var isAdd = false
-  @State var events: [Event] = Event.demoEvents
-  
+
   var body: some View {
     ZStack(alignment: .top) {
       ToolBarView().padding(.horizontal)
@@ -28,7 +27,7 @@ struct TodayView: View {
         .background(.ultraThinMaterial)
 
       ZStack(alignment: .bottom) {
-        TimeLineMainView(events: events)
+        TimeLineMainView()
         // Add Button
         HStack {
           Spacer()
@@ -45,7 +44,7 @@ struct TodayView: View {
         }.padding(20)
       }.zIndex(-1)
         .sheet(isPresented: $isAdd) {
-          AddEventView()
+//          AddEventView()
         }
 
     }
@@ -55,7 +54,7 @@ struct TodayView: View {
 struct CapsuleSearchButton: View {
   var body: some View {
     Button(action: {
-      print("Search tapped")
+      // MARK: - ADD
     }) {
       HStack {
         Image(systemName: "magnifyingglass")
@@ -89,7 +88,7 @@ struct ToolBarView: View {
           Button("Filter By Priority", systemImage: "flame", action: {})
         }
       }
-      // tap animation
+      // MARK: - TAP animation
     }
   }
 }

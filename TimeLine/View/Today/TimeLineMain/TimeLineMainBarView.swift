@@ -9,33 +9,44 @@ import SwiftUI
 
 struct TimeLineMainBarView: View {
   @State var currentTime: Date
-  @Binding var events: [Event]
-  let index: Int
-  
-    var body: some View {
-      ZStack(alignment: .bottomTrailing) {
-          BarBackgroundView(index: index)
-          Text(currentTime.description)
-              .font(.caption)
-              .fixedSize()
-              .position(x: 50)
-      }
-    }
 
-  // MARK: - The shape of the bar
-  func BarBackgroundView(index: Int) -> some Shape {
-      if index == 0 {
-          return AnyShape(
-              UnevenRoundedRectangle(
-                  topLeadingRadius: .infinity, bottomLeadingRadius: 0, bottomTrailingRadius: 0,
-                  topTrailingRadius: .infinity, style: .continuous))
-      } else if index == events.count - 1 {
-          return AnyShape(
-              UnevenRoundedRectangle(
-                  topLeadingRadius: 0, bottomLeadingRadius: .infinity, bottomTrailingRadius: .infinity,
-                  topTrailingRadius: 0, style: .continuous))
-      } else {
-          return AnyShape(Rectangle())
-      }
+  private var isFirst: Bool
+  private var isLast: Bool
+  private var isNow: Bool
+
+  var body: some View {
+    ZStack(alignment: .bottomTrailing) {
+      BarBackgroundView()
+        .overlay(alignment: .topLeading) {
+          Text(currentTime.toRelateiveDateString())
+            .foregroundStyle(.gray)
+            .font(.caption)
+            .fixedSize()
+            .position(x: 65)
+        }
+    }
+  }
+
+  func BarBackgroundView() -> some Shape {
+    if isFirst {
+      return AnyShape(
+        UnevenRoundedRectangle(
+          topLeadingRadius: .infinity, bottomLeadingRadius: 0, bottomTrailingRadius: 0,
+          topTrailingRadius: .infinity, style: .continuous))
+    } else if isLast {
+      return AnyShape(
+        UnevenRoundedRectangle(
+          topLeadingRadius: 0, bottomLeadingRadius: .infinity, bottomTrailingRadius: .infinity,
+          topTrailingRadius: 0, style: .continuous))
+    } else {
+      return AnyShape(Rectangle())
+    }
+  }
+  
+  init(currentTime: Date, isFirst: Bool = false, isLast: Bool = false, isNow: Bool = false) {
+    self.currentTime = currentTime
+    self.isFirst = isFirst
+    self.isLast = isLast
+    self.isNow = isNow
   }
 }
