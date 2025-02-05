@@ -8,27 +8,30 @@
 import SwiftUI
 
 struct HomeView: View {
-    @State var inCompletedTask: Int? = 0
-    
-    var body: some View {
-        TabView {
-            Tab {
-              NavigationStack { TodayView() }
-            } label: {
-                Label("Today", systemImage: "timelapse")
-            }.badge(inCompletedTask ?? 0)
-            
-            Tab {
-                
-            } label: {
-                Label("Archive", systemImage: "archivebox")
-            }
-            
-            Tab {
-                ProfileView()
-            } label: {
-                Label("Profile", systemImage: "person.crop.circle")
-            }
-        }
-    }
+  @State var inCompletedTask: Int? = 0
+  @Environment(\.modelContext) private var modelContext
+  @State private var selectedTab: Int = 0
+  
+      
+      var body: some View {
+          TabView(selection: $selectedTab) {
+              Tab(value: 0) {
+                  NavigationStack { TodayView() }
+              } label: {
+                  Label("Today", systemImage: "timelapse")
+              }
+              
+              Tab(value: 1) {
+//                  ArchiveView()
+              } label: {
+                  Label("Archive", systemImage: "archivebox")
+              }
+              
+              Tab(value: 2) {
+                  ProfileView()
+              } label: {
+                  Label("Profile", systemImage: "person.crop.circle")
+              }
+          }
+      }
 }

@@ -9,11 +9,18 @@ import SwiftUI
 
 struct TodayView: View {
   @State var isAdd = false
+  @Environment(\.modelContext) private var modelContext
 
   var body: some View {
+    // MARK: - 半透明亚克力背景 + 背景模糊 + 杂色
+
     ZStack(alignment: .top) {
-      ToolBarView().padding(.horizontal)
+      ToolBarView()
+        .padding(.horizontal)
         .frame(height: 80)
+//        .background(.ultraThinMaterial)
+        .noiseBackground(opacity: 0.2)
+        .background()
         .background(
           LinearGradient(
             stops: [
@@ -24,10 +31,11 @@ struct TodayView: View {
             endPoint: UnitPoint(x: 0.5, y: 1)
           )
         )
-        .background(.ultraThinMaterial)
 
       ZStack(alignment: .bottom) {
         TimeLineMainView()
+          .padding(.horizontal)
+
         // Add Button
         HStack {
           Spacer()
@@ -41,12 +49,14 @@ struct TodayView: View {
               .background(.blue)
               .clipShape(Circle())
           }
-        }.padding(20)
-      }.zIndex(-1)
-        .sheet(isPresented: $isAdd) {
-//          AddEventView()
         }
-
+        .padding(20)
+      }
+      .sheet(isPresented: $isAdd) {
+        AddEventView(modelContext: modelContext)
+      }
+      .zIndex(-1)
+        
     }
   }
 }
@@ -54,7 +64,7 @@ struct TodayView: View {
 struct CapsuleSearchButton: View {
   var body: some View {
     Button(action: {
-      // MARK: - ADD
+      // MARK: - ADD Search Action
     }) {
       HStack {
         Image(systemName: "magnifyingglass")
@@ -75,9 +85,7 @@ struct ToolBarView: View {
     HStack {
       CapsuleSearchButton()
       Spacer()
-      Button {
-
-      } label: {
+      Button {} label: {
         Image(systemName: "line.3.horizontal.decrease.circle")
           .font(.title2)
       }
@@ -88,7 +96,8 @@ struct ToolBarView: View {
           Button("Filter By Priority", systemImage: "flame", action: {})
         }
       }
-      // MARK: - TAP animation
+
+      // MARK: - TAP animation 快捷筛选
     }
   }
 }

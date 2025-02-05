@@ -5,44 +5,85 @@
 //  Created by mengxin10824 on 2025/1/22.
 //
 
+import SwiftData
 import SwiftUI
 
+// Add and Edit Event
 struct AddEventView: View {
-//  @Binding var data: TimeLineData = TimeLineData()
-  
-  
-  @State var event: Event = Event(title: "", details: "", eventType: .study, createdTime: .now)
+  @Environment(\.modelContext) private var modelContext
+  @Environment(\.dismiss) private var dismiss
+
+  @Bindable var event: Event
+
   @State private var hasTime: Bool = false
 
+  @State private var allEventType: [EventType] = []
+
+  init(event: Event) {
+    self._event = Bindable(event)
+    let hasDefinedTime = event.startTime != nil || event.endTime != nil
+    self._hasTime = State(initialValue: hasDefinedTime)
+  }
+
+  init(modelContext: ModelContext) {
+    let newEvent = Event(
+               title: "New Event",
+               details: "",
+               eventType: EventType(name: "Study", color: .blue)
+           )
+           modelContext.insert(newEvent)
+           self._event = Bindable(wrappedValue: newEvent)
+           self._hasTime = State(initialValue: false)
+  }
+
   var body: some View {
+//    HStack {
+//      Button("Cancel") {
+//        dismiss()
+//      }
+//      Spacer()
+//      Button("Save") {
+//        dismiss()
+//      }
+//    }
     Form {
+      // MARK: - Event Detail Section
+
       Section("Event Detail") {
+        // Title row
         HStack(alignment: .top) {
           Label("Title", systemImage: "note.text")
           TextField("Enter title", text: $event.title)
-            .lineLimit(3...5)
+            .lineLimit(3...5) // Adjust line limits as needed
         }
 
-        VStack {
+        // Details row
+        VStack(alignment: .leading, spacing: 6) {
           HStack {
             Label("Details", systemImage: "info.circle")
             Spacer()
           }
-          TextField("Additional details", text: $event.details, prompt: Text("Required"), axis: .vertical)
-            .lineLimit(5...10)
-          // MARK: - Predict EventType
-//            .onChange(of: event.details, initial: true) { _, newValue in
-//              if let eventType = data.predictEventType(from: newValue) {
-//                  event.eventType = eventType
-//                }
-//            }
+          TextField(
+            "Additional details",
+            text: $event.details,
+            prompt: Text("Required"),
+            axis: .vertical
+          )
+          .lineLimit(5...10)
+          /*
+           .onChange(of: event.details) { newValue in
+               if let predictedType = somePredictEventTypeFunction(from: newValue) {
+                   event.eventType = predictedType
+               }
+           }
+           */
         }
 
         // Event Type Picker
         HStack {
           Label("Event Type", systemImage: "list.bullet")
-          Picker("", selection: $event.eventType) {
-            ForEach(Event.allEventType, id: \.id) { eventType in
+          Picker("Select Type", selection: $event.eventType) {
+            ForEach(allEventType) { eventType in
               Text(eventType.name).tag(eventType)
             }
           }
@@ -50,8 +91,10 @@ struct AddEventView: View {
         }
       }
 
-      Section(header: Text("Time Details")) {
-        // Segmented Control for time selection
+      // MARK: - Time Details Section
+
+      Section("Time Details") {
+        // Switch between "With Time" and "Without Time"
         Picker("Event Timing", selection: $hasTime) {
           Text("With Time").tag(true)
           Text("Without Time").tag(false)
@@ -65,14 +108,18 @@ struct AddEventView: View {
             selection: Binding(
               get: { event.startTime ?? Date() },
               set: { event.startTime = $0 }
-            ), displayedComponents: [.date, .hourAndMinute])
+            ),
+            displayedComponents: [.date, .hourAndMinute]
+          )
 
           DatePicker(
             "End Time",
             selection: Binding(
               get: { event.endTime ?? Date() },
               set: { event.endTime = $0 }
-            ), displayedComponents: [.date, .hourAndMinute])
+            ),
+            displayedComponents: [.date, .hourAndMinute]
+          )
         } else {
           Button("Clear Time") {
             event.startTime = nil
@@ -80,22 +127,64 @@ struct AddEventView: View {
           }
         }
       }
-      
-      
+
+      // MARK: - SubEvents Section
+
       Section("SubEvent") {
         Button {
-          event.subEvents.append(Event(title: "New SubEvent", details: "", eventType: .study, createdTime: .now))
+          let newSubEvent = Event(
+            title: "New SubEvent",
+            details: "",
+            eventType: allEventType[0],
+            startTime: nil,
+            endTime: nil,
+            parentOfEvent: event
+          )
+          event.subEvents.append(newSubEvent)
         } label: {
-          Label(event.subEvents.isEmpty ? "New SubEvent" : "Add SubEvent", systemImage: "plus")
+          Label(
+            event.subEvents.isEmpty ? "New SubEvent" : "Add SubEvent",
+            systemImage: "plus"
+          )
         }
-        
-        ForEach(event.subEvents) { subEvent in
-          Text(subEvent.title)
-        }.onDelete { indexSet in
+
+        ForEach($event.subEvents) { $sub in
+          Text(sub.title)
+        }
+        .onDelete { indexSet in
           event.subEvents.remove(atOffsets: indexSet)
         }
       }
+
+      // MARK: - Priority Section (customize as needed)
+
+      Section("Priority") {
+        HStack {
+          Label("Priority", systemImage: "flame")
+          Spacer()
+          Picker("Priority", selection: $event.importance) {
+            Text("Low").tag(0)
+            Text("Medium").tag(1)
+            Text("High").tag(2)
+          }
+        }
+      }
+    }
+    .onAppear {
+      self.allEventType = fetchAllEventTypes()
+    }
+  }
+
+  func fetchAllEventTypes() -> [EventType] {
+    let descriptor = FetchDescriptor<EventType>(
+      sortBy: [SortDescriptor(\.name, order: .forward)]
+    )
+
+    do {
+      return try modelContext.fetch(descriptor)
+    } catch {
+      print("Fetch error: \(error)")
+      return []
     }
   }
 }
-

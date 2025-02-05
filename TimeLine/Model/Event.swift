@@ -11,8 +11,7 @@ import SwiftUI
 
 @Model
 final class Event: Identifiable {
-
-  var id: UUID
+  @Attribute(.unique) var id: UUID = UUID()
   var title: String
   var details: String
 
@@ -20,29 +19,36 @@ final class Event: Identifiable {
   var eventType: EventType
 
   // time
-  var createdTime: Date
+  var createdTime: Date = Date()
   var startTime: Date?
   var endTime: Date?
 
-  // isSubEvent
-  weak var parentOfEvent: Event?
-  var subEvents: [Event] = []
-  func addSubEvent(_ event: Event) {
-    self.subEvents.append(event)
-    event.parentOfEvent = self
-  }
+  // importance
+  var importance: Int = 0
 
-  
-  init(
-    title: String, details: String, eventType: EventType, createdTime: Date, startTime: Date? = nil,
-    endTime: Date? = nil
-  ) {
-    self.id = UUID()
+  // isSubEvent
+  @Relationship(inverse: \Event.subEvents)
+  weak var parentOfEvent: Event?
+
+  @Relationship(deleteRule: .cascade)
+  var subEvents: [Event] = []
+
+  init(title: String, details: String, eventType: EventType, startTime: Date? = nil, endTime: Date? = nil, importance: Int = 0, parentOfEvent: Event? = nil) {
     self.title = title
     self.details = details
     self.eventType = eventType
-    self.createdTime = createdTime
+    
     self.startTime = startTime
     self.endTime = endTime
+    
+    self.importance = importance
+    
+    self.parentOfEvent = parentOfEvent
+  }
+  
+
+  func addSubEvent(_ event: Event) {
+    self.subEvents.append(event)
+    event.parentOfEvent = self
   }
 }

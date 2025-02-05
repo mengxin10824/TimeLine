@@ -10,15 +10,78 @@ import SwiftData
 
 @main
 struct TimeLineApp: App {
-    var body: some Scene {
-        WindowGroup {
-            HomeView()
-        }
-        .modelContainer(for: Event.self)
-    }
+      let container: ModelContainer
+      
+      init() {
+          do {
+            container = try ModelContainer(for: Event.self, EventType.self)
+              checkAndInsertInitialData()
+          } catch {
+              fatalError("Failed to initialize ModelContainer: \(error)")
+          }
+      }
+      
+      var body: some Scene {
+          WindowGroup {
+              HomeView()
+          }
+          .modelContainer(container)
+      }
+      
+      private func checkAndInsertInitialData() {
+          let context = container.mainContext
+          
+          let descriptor = FetchDescriptor<EventType>()
+          let existingCount = (try? context.fetchCount(descriptor)) ?? 0
+          
+          guard existingCount == 0 else { return }
+          
+          let presetTypes = [
+              EventType(name: "STUDY", hexString: Color.blue.toHex()),
+              EventType(name: "WORK", hexString: Color.green.toHex()),
+              EventType(name: "FITNESS", hexString: Color.orange.toHex()),
+              EventType(name: "LIFE", hexString: Color.yellow.toHex()),
+              EventType(name: "LEISURE", hexString: Color.purple.toHex()),
+              EventType(name: "SOCIAL", hexString: Color.red.toHex()),
+              EventType(name: "FINANCE", hexString: Color.gray.toHex()),
+              EventType(name: "CREATIVITY", hexString: Color.pink.toHex())
+          ]
+          
+          presetTypes.forEach { context.insert($0) }
+          
+          try? context.save()
+      }
 }
 
 
-#Preview {
-    HomeView()
-}
+#Preview(body: {
+  let config = ModelConfiguration(
+      isStoredInMemoryOnly: true,  // 使用内存存储
+      allowsSave: true            // 允许保存操作
+  )
+  
+  // 创建包含所有模型的容器
+  let container = try! ModelContainer(
+      for: Event.self,
+      EventType.self,
+      configurations: config
+  )
+  
+  // 插入预览需要的初始数据
+  let context = container.mainContext
+  let previewTypes = [
+      EventType(name: "Preview STUDY", hexString: Color.blue.toHex()),
+      EventType(name: "Preview WORK", hexString: Color.green.toHex())
+  ]
+  let previewEvent = [
+    Event(title: "Now", details: "", eventType: previewTypes[0], startTime: .now, endTime: Calendar.current.date(byAdding: .hour, value: 1, to: .now))
+  ]
+  previewTypes.forEach { context.insert($0) }
+  previewEvent.forEach { context.insert($0) }
+
+  
+  return HomeView()
+      .modelContainer(container)
+      // 可选：注入预览用的环境值
+      .environment(\.calendar, Calendar(identifier: .gregorian))
+})

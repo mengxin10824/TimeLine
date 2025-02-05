@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TimeLineMainBarView: View {
   @State var currentTime: Date
-
+  
   private var isFirst: Bool
   private var isLast: Bool
   private var isNow: Bool
@@ -18,11 +18,12 @@ struct TimeLineMainBarView: View {
     ZStack(alignment: .bottomTrailing) {
       BarBackgroundView()
         .overlay(alignment: .topLeading) {
-          Text(currentTime.toRelateiveDateString())
+          Text("\(currentTime.toRelativeDateString())")
             .foregroundStyle(.gray)
             .font(.caption)
             .fixedSize()
-            .position(x: 65)
+            .position(x: 60)
+            .multilineTextAlignment(.leading)
         }
     }
   }

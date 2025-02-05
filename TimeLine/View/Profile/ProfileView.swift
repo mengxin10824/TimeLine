@@ -13,6 +13,7 @@ struct ProfileView: View {
     var body: some View {
         NavigationStack {
             List {
+              // MARK: - 转移到 ArchiveView
 #if os(iOS)
                 Section("ANALYSE") {
                     HeatMapView()
@@ -22,10 +23,10 @@ struct ProfileView: View {
                     Toggle("TimeLine", isOn: $isOn)
                 }
                 Section("IMPORT & EXPORT") {
-                    // navigation link and icloud async
+                  // MARK: - 导入导出 导出png
                 }
                 Section("TEMPLATE") {
-                    //
+                  // MARK: - 模版？
                 }
             }
         }
