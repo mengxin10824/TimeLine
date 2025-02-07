@@ -16,7 +16,7 @@ struct ProfileView: View {
               // MARK: - 转移到 ArchiveView
 #if os(iOS)
                 Section("ANALYSE") {
-                    HeatMapView()
+//                    HeatMapView()
                 }
 #endif
                 Section("SETTING"){

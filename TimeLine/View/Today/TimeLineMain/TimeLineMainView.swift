@@ -129,12 +129,15 @@ struct TimeLineMainView: View {
     ScrollView([.vertical]) {
       ScrollViewReader { proxy in
         LazyVStack(alignment: .leading, spacing: 0) {
-          ForEach(self.cachedHours, id: \.self) { hour in
+          ForEach(Array(self.cachedHours.enumerated()), id: \.offset) { (index, hour) in
+            let eventsInThisHour = events(atHour: hour)
             HStack(alignment: .top, spacing: 8) {
               TimeLineMainBarView(currentTime: hour)
-                .frame(width: 20, height: self.hourHeight)
-
-              let eventsInThisHour = events(atHour: hour)
+                .frame(
+                  width: 20,
+                  height: eventsInThisHour.count == 0 ? 30 : self.hourHeight
+                )
+              
               VStack {
                 ForEach(eventsInThisHour, id: \.id) { event in
                   EventBlockView(event: event)
@@ -175,6 +178,9 @@ struct TimeLineMainView: View {
     }
     let components = calendar.dateComponents([.minute], from: startTime)
     let offset = (components.minute ?? 0) / 60
+    guard offset < 0 else {
+        return 0
+    }
     return CGFloat(offset) * hourHeight
   }
   

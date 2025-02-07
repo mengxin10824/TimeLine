@@ -70,11 +70,11 @@ struct TimeLineApp: App {
   // 插入预览需要的初始数据
   let context = container.mainContext
   let previewTypes = [
-      EventType(name: "Preview STUDY", hexString: Color.blue.toHex()),
-      EventType(name: "Preview WORK", hexString: Color.green.toHex())
+      EventType(name: "STUDY", hexString: Color.blue.toHex()),
+      EventType(name: "WORK", hexString: Color.green.toHex())
   ]
   let previewEvent = [
-    Event(title: "Now", details: "", eventType: previewTypes[0], startTime: .now, endTime: Calendar.current.date(byAdding: .hour, value: 1, to: .now))
+    Event(title: "Now", details: "21313618", eventType: previewTypes[0], startTime: .now, endTime: Calendar.current.date(byAdding: .hour, value: 1, to: .now))
   ]
   previewTypes.forEach { context.insert($0) }
   previewEvent.forEach { context.insert($0) }
