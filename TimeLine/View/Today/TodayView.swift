@@ -18,7 +18,7 @@ struct TodayView: View {
       TodayToolBarView()
 
       ZStack(alignment: .bottom) {
-        TimeLineMainView()
+        TodayScrollView()
 
         // Add Button
         HStack {
