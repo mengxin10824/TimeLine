@@ -22,12 +22,6 @@ struct HomeView: View {
               }
               
               Tab(value: 1) {
-//                  ArchiveView()
-              } label: {
-                  Label("Archive", systemImage: "archivebox")
-              }
-              
-              Tab(value: 2) {
                   ProfileView()
               } label: {
                   Label("Profile", systemImage: "person.crop.circle")

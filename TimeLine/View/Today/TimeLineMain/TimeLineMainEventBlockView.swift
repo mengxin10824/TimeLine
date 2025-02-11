@@ -8,6 +8,12 @@ import SwiftUI
 
 struct EventBlockView: View {
   @State var event: Event
+  let isPreview: Bool
+  
+  init(event: Event, isPreview: Bool = false) {
+    self.event = event
+    self.isPreview = isPreview
+  }
 
   var body: some View {
     let tintColor: Color = event.eventType.color
@@ -18,16 +24,22 @@ struct EventBlockView: View {
           EventDetailsView(details: event.details, tintColor: tintColor)
         }
         EventInfoView(event: event, tintColor: tintColor)
+        
+        if isPreview {
+          SubEventsView(subEvents: event.subEvents, tintColor: tintColor)
+        }
       }
       .padding(20)
       .background(tintColor.opacity(0.1))
+      .background(.ultraThinMaterial)
       .clipShape(RoundedRectangle(cornerRadius: 15))
       .contextMenu(
         menuItems: {
           Label("1", systemImage: "circle")
         },
         preview: {
-          EventBlockPreview(event: event, tintColor: tintColor)
+          EventBlockView(event: event, isPreview: true)
+            .frame(width: .infinity, height: .infinity)
         }
       )
       .frame(minWidth: 300, minHeight: 70)
@@ -155,27 +167,16 @@ struct SubEventsView: View {
   }
 }
 
-struct EventBlockPreview: View {
-  let event: Event
-  let tintColor: Color
-  
-  var body: some View {
-    VStack(spacing: 0) {
-      EventBlockView(event: event)
-      SubEventsView(subEvents: event.subEvents, tintColor: event.eventType.color)
-        .background(tintColor.opacity(0.1))
-        .clipShape(UnevenRoundedRectangle(bottomLeadingRadius: 20, bottomTrailingRadius: 20))
-        .padding(.horizontal)
-    }
-  }
-}
-
 #Preview {
-  let event = Event(title: "Title", details: "Details", eventType: EventType(name: "STUDY", hexString: "#E34343"), importance: 1)
-  event.addSubEvent(Event(title: "1", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
-  event.addSubEvent(Event(title: "1akbhdjkasbvjdbajdbasbdjksbdkadasbjdbjksad", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
-  event.addSubEvent(Event(title: "1", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
+  var event: Event {
+    let event = Event(title: "Title", details: "Details", eventType: EventType(name: "STUDY", hexString: "#E34343"), importance: 1)
+    event.addSubEvent(Event(title: "1", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
+    event.addSubEvent(Event(title: "1akbhdjkasbvjdbajdbasbdjksbdkadasbjdbjksad", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
+    event.addSubEvent(Event(title: "1", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
+    
+    return event
+  }
 
-  return EventBlockView(event: event)
+  EventBlockView(event: event)
     .frame(width: 200, height: 300)
 }

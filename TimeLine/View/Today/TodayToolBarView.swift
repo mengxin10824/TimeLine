@@ -37,9 +37,10 @@ struct TodayToolBarView: View {
     }
     .padding()
     .padding(.bottom, 10)
-    .mask {
-      LinearGradient(colors: [.clear, .clear.opacity(0)], startPoint: .init(x: 0, y: 0.3), endPoint: .init(x: 0, y: 1))
-    }
+    .background()
+//    .mask {
+//      LinearGradient(colors: [.clear, .clear.opacity(0)], startPoint: .init(x: 0, y: 0.3), endPoint: .init(x: 0, y: 1))
+//    }
   }
 }
 

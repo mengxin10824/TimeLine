@@ -13,10 +13,9 @@ struct TodayView: View {
 
   var body: some View {
     ZStack(alignment: .top) {
-      TodayBackgroundView()
-      
       TodayToolBarView()
-
+        .zIndex(2)
+      
       ZStack(alignment: .bottom) {
         TodayScrollView()
 
@@ -39,8 +38,6 @@ struct TodayView: View {
       .sheet(isPresented: $isAdd) {
         AddEventView(modelContext: modelContext)
       }
-      .zIndex(1)
-        
     }
   }
 }

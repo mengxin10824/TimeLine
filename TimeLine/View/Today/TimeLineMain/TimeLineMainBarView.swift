@@ -8,46 +8,53 @@
 import SwiftUI
 
 struct TimeLineMainBarView: View {
-  @State var currentTime: Date
-  
-  private var isFirst: Bool
-  private var isLast: Bool
-  private var isNow: Bool
+  @State var hour: Date
+
+  var isPast: Bool = false
+  var isNow: Bool = false
 
   var body: some View {
-    ZStack(alignment: .bottomTrailing) {
+    HStack(spacing: 0) {
       BarBackgroundView()
-        .overlay(alignment: .topLeading) {
-          Text("\(currentTime.toRelativeDateString())")
-            .foregroundStyle(.gray)
-            .font(.caption)
-            .fixedSize()
-            .position(x: 60)
-            .multilineTextAlignment(.leading)
-        }
+        .frame(width: 20)
+
+      Text(hour.toRelativeDateString())
+        .foregroundStyle(.gray)
+        .font(.system(size: 10, weight: .bold))
+        .fixedSize()
+        .multilineTextAlignment(.leading)
+        .offset(x: 10)
+        .frame(width: 0, alignment: .leading)
     }
   }
 
-  func BarBackgroundView() -> some Shape {
-    if isFirst {
-      return AnyShape(
+  func BarBackgroundView() -> some View {
+    let calendar = Calendar.current
+    let hourComponents = calendar.dateComponents([.hour], from: hour)
+    let hourValue = hourComponents.hour ?? 0
+
+    if hourValue == 0 {
+      return AnyView(
         UnevenRoundedRectangle(
-          topLeadingRadius: .infinity, bottomLeadingRadius: 0, bottomTrailingRadius: 0,
-          topTrailingRadius: .infinity, style: .continuous))
-    } else if isLast {
-      return AnyShape(
+          topLeadingRadius: .infinity,
+          bottomLeadingRadius: 0,
+          bottomTrailingRadius: 0,
+          topTrailingRadius: .infinity,
+          style: .continuous
+        ).padding(.top, 20)
+      )
+    } else if hourValue == 23 {
+      return AnyView(
         UnevenRoundedRectangle(
-          topLeadingRadius: 0, bottomLeadingRadius: .infinity, bottomTrailingRadius: .infinity,
-          topTrailingRadius: 0, style: .continuous))
+          topLeadingRadius: 0,
+          bottomLeadingRadius: .infinity,
+          bottomTrailingRadius: .infinity,
+          topTrailingRadius: 0,
+          style: .continuous
+        )
+      )
     } else {
-      return AnyShape(Rectangle())
+      return AnyView(Rectangle())
     }
-  }
-  
-  init(currentTime: Date, isFirst: Bool = false, isLast: Bool = false, isNow: Bool = false) {
-    self.currentTime = currentTime
-    self.isFirst = isFirst
-    self.isLast = isLast
-    self.isNow = isNow
   }
 }

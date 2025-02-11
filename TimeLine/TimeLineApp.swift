@@ -11,7 +11,7 @@ import SwiftData
 @main
 struct TimeLineApp: App {
       let container: ModelContainer
-      
+
       init() {
           do {
             container = try ModelContainer(for: Event.self, EventType.self)
@@ -56,8 +56,8 @@ struct TimeLineApp: App {
 
 #Preview(body: {
   let config = ModelConfiguration(
-      isStoredInMemoryOnly: true,  // 使用内存存储
-      allowsSave: true            // 允许保存操作
+      isStoredInMemoryOnly: true,
+      allowsSave: true
   )
   
   // 创建包含所有模型的容器
@@ -74,7 +74,7 @@ struct TimeLineApp: App {
       EventType(name: "WORK", hexString: Color.green.toHex())
   ]
   let previewEvent = [
-    Event(title: "Now", details: "21313618", eventType: previewTypes[0], startTime: .now, endTime: Calendar.current.date(byAdding: .hour, value: 1, to: .now))
+    Event(title: "Now", details: "21313618", eventType: previewTypes[0], startTime: .now, endTime: Calendar.current.date(byAdding: .hour, value: 5, to: .now))
   ]
   previewTypes.forEach { context.insert($0) }
   previewEvent.forEach { context.insert($0) }

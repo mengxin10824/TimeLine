@@ -29,11 +29,14 @@ struct TimeLineMainView: View {
   var body: some View {
     let eventsInThisHour = events(atHour: hour)
     HStack(alignment: .top, spacing: 8) {
+      
       // TimeLine Bar
-      TimeLineMainBarView(currentTime: hour)
+      TimeLineMainBarView(hour: hour)
+//        .frame(
+//          height: eventsInThisHour.count == 0 ? 50 : self.hourHeight
+//        )
         .frame(
-          width: 20,
-          height: eventsInThisHour.count == 0 ? 30 : self.hourHeight
+          height: self.hourHeight
         )
       
       VStack {

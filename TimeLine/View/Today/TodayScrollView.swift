@@ -19,12 +19,14 @@ struct TodayScrollView: View {
     
     init(calendar: Calendar = .current) {
         self.calendar = calendar
-        
         let todayStart = calendar.startOfDay(for: .now)
         var dates: [Date] = []
         
+      
+      // Init cache hours array
         for dayOffset in -1...1 {
-            guard let dayStart = calendar.date(byAdding: .day, value: dayOffset, to: todayStart) else { continue }
+          guard let dayStart = calendar.date(byAdding: .day, value: dayOffset, to: todayStart) else { continue
+          }
             
             for hour in 0..<hoursPerDay {
                 if let newDate = calendar.date(byAdding: .hour, value: hour, to: dayStart) {
@@ -41,6 +43,7 @@ struct TodayScrollView: View {
                 LazyVStack(spacing: 0) {
                     ForEach(cachedHours, id: \.self) { hour in
                       TimeLineMainView(hour: hour)
+                            .padding(.leading, 20)
                             .id(hour)
                             .onAppear {
                                 handleAppear(hour: hour, proxy: proxy)
@@ -52,7 +55,10 @@ struct TodayScrollView: View {
                 }
                 .padding(.vertical)
                 .onAppear {
+                  // Scroll to Now
+                  DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     scrollToCurrentHour(proxy: proxy)
+                  }
                 }
             }
         }
