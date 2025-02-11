@@ -87,8 +87,6 @@ struct ProfileView: View {
   
   func setUserSetting(value: Any, forKey key: String) {
     UserDefaults.standard.set(value, forKey: key)
-    // UserDefaults.standard.set(<#T##value: Any?##Any?#>, forKey: <#T##String#>)
-    // UserDefaults.standard.string(forKey: "")
   }
   
   func loadUserSetting() {

@@ -5,17 +5,20 @@
 //  Created by mengxin10824 on 2025/1/21.
 //
 
+import SwiftData
 import SwiftUI
 
 struct TodayView: View {
-  @State var isAdd = false
+  @State var modifyEvent: Event?
   @Environment(\.modelContext) private var modelContext
+
+  @Query var eventTypes: [EventType]
 
   var body: some View {
     ZStack(alignment: .top) {
       TodayToolBarView()
         .zIndex(2)
-      
+
       ZStack(alignment: .bottom) {
         TodayScrollView()
 
@@ -23,7 +26,7 @@ struct TodayView: View {
         HStack {
           Spacer()
           Button {
-            isAdd.toggle()
+            addEvent()
           } label: {
             Image(systemName: "plus")
               .font(.title)
@@ -35,11 +38,16 @@ struct TodayView: View {
         }
         .padding(20)
       }
-      .sheet(isPresented: $isAdd) {
-        AddEventView(modelContext: modelContext)
+      .sheet(item: $modifyEvent, onDismiss: {
+        modifyEvent = nil
+      }) { currentEvent in
+        AddEventView(event: currentEvent)
       }
     }
   }
+
+  func addEvent() {
+    let firstEventTypes = eventTypes.first!
+    modifyEvent = Event(title: "", details: "", eventType: firstEventTypes)
+  }
 }
-
-

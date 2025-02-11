@@ -14,7 +14,7 @@ struct TimeLineMainBarView: View {
   var isNow: Bool = false
 
   var body: some View {
-    HStack(spacing: 0) {
+    HStack(alignment: .top, spacing: 0) {
       BarBackgroundView()
         .frame(width: 20)
 

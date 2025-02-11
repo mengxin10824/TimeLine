@@ -20,6 +20,13 @@ struct TodayToolBarView: View {
           .font(.title2)
       }
       .contextMenu {
+        Button("Back to Now", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90") {
+          
+        }
+        Button("Quick Add", systemImage: "plus") {
+          
+        }
+        
         Section("Quick Filter") {
           Button("Filter By Type", systemImage: "list.bullet.indent", action: {
             
@@ -58,7 +65,7 @@ struct CapsuleSearchButton: View {
       }
       .padding(.horizontal, 15)
       .padding(.vertical, 8)
-      .background(Capsule().fill(Color(.systemGray6)))
+      .background(Capsule().fill(.gray.opacity(0.1)))
     }
   }
 }

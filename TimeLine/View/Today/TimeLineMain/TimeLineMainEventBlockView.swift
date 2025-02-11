@@ -9,7 +9,7 @@ import SwiftUI
 struct EventBlockView: View {
   @State var event: Event
   let isPreview: Bool
-  
+
   init(event: Event, isPreview: Bool = false) {
     self.event = event
     self.isPreview = isPreview
@@ -18,13 +18,14 @@ struct EventBlockView: View {
   var body: some View {
     let tintColor: Color = event.eventType.color
 
+    VStack {
       VStack(alignment: .trailing, spacing: 8) {
         EventTitleView(title: event.title, tintColor: tintColor)
         if !event.details.isEmpty {
           EventDetailsView(details: event.details, tintColor: tintColor)
         }
         EventInfoView(event: event, tintColor: tintColor)
-        
+
         if isPreview {
           SubEventsView(subEvents: event.subEvents, tintColor: tintColor)
         }
@@ -33,16 +34,22 @@ struct EventBlockView: View {
       .background(tintColor.opacity(0.1))
       .background(.ultraThinMaterial)
       .clipShape(RoundedRectangle(cornerRadius: 15))
-      .contextMenu(
-        menuItems: {
-          Label("1", systemImage: "circle")
-        },
-        preview: {
-          EventBlockView(event: event, isPreview: true)
-            .frame(width: .infinity, height: .infinity)
-        }
-      )
-      .frame(minWidth: 300, minHeight: 70)
+      if !isPreview {
+        Spacer()
+      }
+    }
+    .background(tintColor.opacity(0.1))
+    .clipShape(RoundedRectangle(cornerRadius: 15))
+    .contextMenu(
+      menuItems: {
+        Label("1", systemImage: "circle")
+      },
+      preview: {
+        EventBlockView(event: event, isPreview: true)
+      }
+    )
+
+    .frame(width: .infinity, height: .infinity)
   }
 
   private func priorityText(for importance: Int) -> String {
@@ -173,10 +180,10 @@ struct SubEventsView: View {
     event.addSubEvent(Event(title: "1", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
     event.addSubEvent(Event(title: "1akbhdjkasbvjdbajdbasbdjksbdkadasbjdbjksad", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
     event.addSubEvent(Event(title: "1", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
-    
+
     return event
   }
 
   EventBlockView(event: event)
-    .frame(width: 200, height: 300)
+    .frame(width: 200, height: 600)
 }

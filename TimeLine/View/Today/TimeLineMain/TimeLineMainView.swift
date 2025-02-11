@@ -32,21 +32,44 @@ struct TimeLineMainView: View {
       
       // TimeLine Bar
       TimeLineMainBarView(hour: hour)
-//        .frame(
-//          height: eventsInThisHour.count == 0 ? 50 : self.hourHeight
-//        )
-        .frame(
-          height: self.hourHeight
-        )
+        .frame(height: hourHeight)
       
-      VStack {
-        ForEach(eventsInThisHour, id: \.id) { event in
-          EventBlockView(event: event)
-            .frame(width: 100, height: self.calcEventHeight(event: event))
-            .offset(y: self.calcEventOffsetY(event: event))
+      ZStack(alignment: .top) {
+        VStack {
+          ForEach(eventsInThisHour, id: \.id) { event in
+            EventBlockView(event: event)
+              .overlay(alignment: .leading) {
+                VStack {
+                  timeView(time: event.startTime).offset(y: -20)
+                  Spacer()
+                  timeView(time: event.endTime).offset(y: 20)
+                }
+              }
+              .frame(width: 200, height: 1000)
+              .offset(y: self.calcEventOffsetY(event: event))
+          }
         }
       }
-      .frame(maxWidth: .infinity)
+      .offset(x: 200)
+      .frame(width: 0, height: hourHeight, alignment: .top)
+      
+      Spacer()
+    }
+  }
+  
+  private func timeView(time: Date?) -> some View {
+    if let time = time {
+      let dateFormatter = DateFormatter()
+      dateFormatter.dateFormat = "HH:mm"
+      let timeString = dateFormatter.string(from: time)
+
+      return AnyView(
+        Text(timeString)
+          .font(.system(size: 14, weight: .light))
+          .foregroundStyle(.secondary)
+      )
+    } else {
+      return AnyView(EmptyView())
     }
   }
 
@@ -57,16 +80,21 @@ struct TimeLineMainView: View {
     
     let components = calendar.dateComponents([.day, .hour, .minute], from: startTime, to: endTime)
     let offset = (components.day ?? 0) * 24 + (components.hour ?? 0) + (components.minute ?? 0) / 60
-    return CGFloat(offset)
+    
+    guard offset > 0 else {
+      return defaultEventHeight
+    }
+    return CGFloat(offset) * hourHeight
   }
   
   private func calcEventOffsetY(event: Event) -> CGFloat {
     guard let startTime = event.startTime, let _ = event.endTime else {
       return defaultEventHeight
     }
+    
     let components = calendar.dateComponents([.minute], from: startTime)
     let offset = (components.minute ?? 0) / 60
-    guard offset < 0 else {
+    guard offset > 0 else {
       return 0
     }
     return CGFloat(offset) * hourHeight

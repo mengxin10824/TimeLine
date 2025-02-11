@@ -19,23 +19,6 @@ struct AddEventView: View {
 
   @State private var allEventType: [EventType] = []
 
-  init(event: Event) {
-    self._event = Bindable(event)
-    let hasDefinedTime = event.startTime != nil || event.endTime != nil
-    self._hasTime = State(initialValue: hasDefinedTime)
-  }
-
-  init(modelContext: ModelContext) {
-    let newEvent = Event(
-               title: "New Event",
-               details: "",
-               eventType: EventType(name: "Study", color: .blue)
-           )
-           modelContext.insert(newEvent)
-           self._event = Bindable(wrappedValue: newEvent)
-           self._hasTime = State(initialValue: false)
-  }
-
   var body: some View {
 //    HStack {
 //      Button("Cancel") {
@@ -70,13 +53,11 @@ struct AddEventView: View {
             axis: .vertical
           )
           .lineLimit(5...10)
-          /*
-           .onChange(of: event.details) { newValue in
-               if let predictedType = somePredictEventTypeFunction(from: newValue) {
-                   event.eventType = predictedType
-               }
-           }
-           */
+//           .onChange(of: event.details) { newValue in
+//               if let predictedType = somePredictEventTypeFunction(from: newValue) {
+//                   event.eventType = predictedType
+//               }
+//           }
         }
 
         // Event Type Picker
@@ -172,6 +153,7 @@ struct AddEventView: View {
     }
     .onAppear {
       self.allEventType = fetchAllEventTypes()
+      self.hasTime = event.startTime != nil || event.endTime != nil
     }
   }
 

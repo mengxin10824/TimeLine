@@ -8,6 +8,7 @@
 import PhotosUI
 import SwiftUI
 
+#if os(iOS)
 struct ExportToPhoto: View {
   let data: [[Double]]
   let tintColor: Color
@@ -41,6 +42,7 @@ struct ExportToPhoto: View {
 
       if isImageSaved {
         Text("Image saved to Photos")
+          .foregroundColor(.green)
           .padding()
       }
     }
@@ -190,3 +192,5 @@ struct BelowShape: Shape {
     return path
   }
 }
+
+#endif
