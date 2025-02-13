@@ -34,9 +34,10 @@ struct TimeLineMainView: View {
       TimeLineMainBarView(hour: hour)
         .frame(height: hourHeight)
       
-      ZStack(alignment: .top) {
-        VStack {
-          ForEach(eventsInThisHour, id: \.id) { event in
+      
+      
+        ZStack {
+          ForEach(Array(eventsInThisHour.enumerated()), id: \.offset) { index, event in
             EventBlockView(event: event)
               .overlay(alignment: .leading) {
                 VStack {
@@ -45,16 +46,17 @@ struct TimeLineMainView: View {
                   timeView(time: event.endTime).offset(y: 20)
                 }
               }
-              .frame(width: 200, height: 1000)
-              .offset(y: self.calcEventOffsetY(event: event))
+              .frame(width: 200, height: self.calcEventHeight(event: event))
+              .offset(x: CGFloat(index * 20), y: self.calcEventOffsetY(event: event))
+              .zIndex(Double(index))
           }
         }
-      }
-      .offset(x: 200)
-      .frame(width: 0, height: hourHeight, alignment: .top)
-      
+        .offset(x: 80)
+        .frame(width: 0, height: hourHeight, alignment: .topLeading)
+        
       Spacer()
     }
+
   }
   
   private func timeView(time: Date?) -> some View {
@@ -109,11 +111,13 @@ struct TimeLineMainView: View {
       return []
     }
       
-    return allEvents.filter { event in
+    return allEvents
+      .filter { event in
       guard let start = event.startTime else {
         return false
       }
       return start >= startOfHour && start < endOfHour
-    }
+      }
+      .sorted { $0.startTime! > $1.startTime! }
   }
 }

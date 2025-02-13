@@ -74,7 +74,8 @@ struct TimeLineApp: App {
       EventType(name: "WORK", hexString: Color.green.toHex())
   ]
   let previewEvent = [
-    Event(title: "Now", details: "21313618", eventType: previewTypes[0], startTime: .now, endTime: Calendar.current.date(byAdding: .hour, value: 2, to: .now))
+    Event(title: "Now", details: "1313618", eventType: previewTypes[0], startTime: .now, endTime: Calendar.current.date(byAdding: .hour, value: 2, to: .now)),
+    Event(title: "Now", details: "2618", eventType: previewTypes[0], startTime: .now, endTime: Calendar.current.date(byAdding: .hour, value: 3, to: .now))
   ]
   previewTypes.forEach { context.insert($0) }
   previewEvent.forEach { context.insert($0) }

@@ -8,6 +8,8 @@ import SwiftUI
 
 struct EventBlockView: View {
   @State var event: Event
+  @State private var modifyEvent: Event?
+
   let isPreview: Bool
 
   init(event: Event, isPreview: Bool = false) {
@@ -42,13 +44,30 @@ struct EventBlockView: View {
     .clipShape(RoundedRectangle(cornerRadius: 15))
     .contextMenu(
       menuItems: {
-        Label("1", systemImage: "circle")
+        Section("Actions") {
+          Button("Edit", systemImage: "pencil") {
+            modifyEvent = event
+          }
+          Button("Delete", systemImage: "trash") {
+            
+          }
+        }
+        Button("Focus Mode", systemImage: "fitness.timer") {
+          
+        }
       },
       preview: {
         EventBlockView(event: event, isPreview: true)
       }
     )
-
+    .onTapGesture {
+      modifyEvent = event
+    }
+    .sheet(item: $modifyEvent, onDismiss: {
+      modifyEvent = nil
+    }) { currentEvent in
+      AddEventView(event: currentEvent)
+    }
     .frame(width: .infinity, height: .infinity)
   }
 

@@ -28,11 +28,19 @@ struct ProfileView: View {
   var body: some View {
     NavigationStack {
       List {
+        Section("NOW") {
+          
+        }
+        
+        
         Section("ANALYSE") {
           HeatMapView(data: data, tintColor: tintColor)
             .padding()
             .contextMenu {
-              Text("111")
+              Button("Export to Photo", systemImage: "photo") {
+                isPresented = true
+              }
+              Text("Based on the data of the last 30 days")
             }
           
           Label {
@@ -55,8 +63,6 @@ struct ProfileView: View {
             Image(systemName: "flag.square.fill")
           }
           .badge(10)
-          
-          
         }
         
         Section("SETTING"){
@@ -69,7 +75,7 @@ struct ProfileView: View {
           
         }
         Section("IMPORT & EXPORT") {
-          Button("Export To Photo") {
+          Button("Export To Photo", systemImage: "photo") {
             isPresented = true
           }
         }
@@ -93,6 +99,10 @@ struct ProfileView: View {
     if let _tintColor = UserDefaults.standard.string(forKey: "tintColor") {
       tintColor = Color(hex: _tintColor)
     }
+    if let _secondaryTintColor = UserDefaults.standard.string(forKey: "secondaryTintColor") {
+      secondaryTintColor = Color(hex: _secondaryTintColor)
+    }
+    
   }
   
 }

@@ -46,7 +46,6 @@ final class Event: Identifiable {
     self.parentOfEvent = parentOfEvent
   }
   
-
   func addSubEvent(_ event: Event) {
     self.subEvents.append(event)
     event.parentOfEvent = self

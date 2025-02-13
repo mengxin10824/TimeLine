@@ -43,6 +43,7 @@ struct TodayScrollView: View {
         LazyVStack(spacing: 0) {
           ForEach(cachedHours, id: \.self) { hour in
             TimeLineMainView(hour: hour)
+              .frame(width: .infinity)
               .padding(.leading, 20)
               .id(hour)
               .onAppear {

@@ -17,18 +17,19 @@ struct AddEventView: View {
 
   @State private var hasTime: Bool = false
 
-  @State private var allEventType: [EventType] = []
+  @Query private var allEventType: [EventType] = []
 
   var body: some View {
-//    HStack {
-//      Button("Cancel") {
-//        dismiss()
-//      }
-//      Spacer()
-//      Button("Save") {
-//        dismiss()
-//      }
-//    }
+    HStack {
+      Button("Cancel") {
+        dismiss()
+      }
+      Spacer()
+      Button("Save") {
+        try? modelContext.save()
+        dismiss()
+      }
+    }
     Form {
       // MARK: - Event Detail Section
 
@@ -116,7 +117,7 @@ struct AddEventView: View {
           let newSubEvent = Event(
             title: "New SubEvent",
             details: "",
-            eventType: allEventType[0],
+            eventType: event.eventType,
             startTime: nil,
             endTime: nil,
             parentOfEvent: event
@@ -137,8 +138,6 @@ struct AddEventView: View {
         }
       }
 
-      // MARK: - Priority Section (customize as needed)
-
       Section("Priority") {
         HStack {
           Label("Priority", systemImage: "flame")
@@ -152,21 +151,11 @@ struct AddEventView: View {
       }
     }
     .onAppear {
-      self.allEventType = fetchAllEventTypes()
       self.hasTime = event.startTime != nil || event.endTime != nil
     }
-  }
-
-  func fetchAllEventTypes() -> [EventType] {
-    let descriptor = FetchDescriptor<EventType>(
-      sortBy: [SortDescriptor(\.name, order: .forward)]
-    )
-
-    do {
-      return try modelContext.fetch(descriptor)
-    } catch {
-      print("Fetch error: \(error)")
-      return []
-    }
+    
+//    func somePredictEventTypeFunction(from details: String) -> EventType? {
+////      if let pre
+//    }
   }
 }

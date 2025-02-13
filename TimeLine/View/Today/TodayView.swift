@@ -35,6 +35,15 @@ struct TodayView: View {
               .background(.blue)
               .clipShape(Circle())
           }
+          .contextMenu {
+            Section("Quick Add By Event Type") {
+              ForEach(eventTypes) { eventType in
+                Button("\(eventType.name)") {
+                  addEvent(eventType: eventType)
+                }
+              }
+            }
+          }
         }
         .padding(20)
       }
@@ -46,8 +55,11 @@ struct TodayView: View {
     }
   }
 
-  func addEvent() {
-    let firstEventTypes = eventTypes.first!
-    modifyEvent = Event(title: "", details: "", eventType: firstEventTypes)
+  func addEvent(eventType: EventType? = nil) {
+    let currentEventTypes = eventType ?? eventTypes.first!
+    let newEvent = Event(title: "", details: "", eventType: currentEventTypes)
+    modelContext.insert(newEvent)
+    modifyEvent = newEvent
+    try? modelContext.save()
   }
 }
