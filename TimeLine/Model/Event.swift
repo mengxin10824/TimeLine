@@ -32,6 +32,9 @@ final class Event: Identifiable {
 
   @Relationship(deleteRule: .cascade)
   var subEvents: [Event] = []
+  
+  
+  var isCompleted: Bool = false
 
   init(title: String, details: String, eventType: EventType, startTime: Date? = nil, endTime: Date? = nil, importance: Int = 0, parentOfEvent: Event? = nil) {
     self.title = title
@@ -49,5 +52,13 @@ final class Event: Identifiable {
   func addSubEvent(_ event: Event) {
     self.subEvents.append(event)
     event.parentOfEvent = self
+  }
+  
+  func complete() {
+    self.isCompleted = true
+  }
+  
+  func uncomplete() {
+    self.isCompleted = false
   }
 }

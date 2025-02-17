@@ -9,7 +9,7 @@ struct HeatMapView: View {
   let columnCount: Int
   
   let cellSize: CGFloat = 10
-  let spacing: CGFloat = 2
+  let spacing: CGFloat = 5
   
   let cornerRadius: CGFloat = 2
   
@@ -38,6 +38,7 @@ struct HeatMapView: View {
           
         RoundedRectangle(cornerRadius: cornerRadius)
           .fill(getThemeColor(value: value))
+          .border(Color.primary.opacity(0.1))
           .frame(width: cellSize, height: cellSize)
       }
     }
@@ -49,6 +50,8 @@ struct HeatMapView: View {
   }
     
   private func getThemeColor(value: Double) -> Color {
+    guard value != 0 else { return .gray.opacity(0.3) }
+    
     let index = min(Int(value * Double(themeColors.count - 1)), themeColors.count - 1)
     return themeColors[index]
   }

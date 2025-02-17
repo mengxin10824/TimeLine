@@ -29,34 +29,30 @@ struct TimeLineMainView: View {
   var body: some View {
     let eventsInThisHour = events(atHour: hour)
     HStack(alignment: .top, spacing: 8) {
-      
       // TimeLine Bar
       TimeLineMainBarView(hour: hour)
         .frame(height: hourHeight)
       
-      
-      
-        ZStack {
-          ForEach(Array(eventsInThisHour.enumerated()), id: \.offset) { index, event in
-            EventBlockView(event: event)
-              .overlay(alignment: .leading) {
-                VStack {
-                  timeView(time: event.startTime).offset(y: -20)
-                  Spacer()
-                  timeView(time: event.endTime).offset(y: 20)
-                }
+      ZStack {
+        ForEach(Array(eventsInThisHour.enumerated()), id: \.offset) { index, event in
+          EventBlockView(event: event)
+            .overlay(alignment: .leading) {
+              VStack {
+                timeView(time: event.startTime).offset(y: -20)
+                Spacer()
+                timeView(time: event.endTime).offset(y: 20)
               }
-              .frame(width: 200, height: self.calcEventHeight(event: event))
-              .offset(x: CGFloat(index * 20), y: self.calcEventOffsetY(event: event))
-              .zIndex(Double(index))
-          }
+            }
+            .frame(width: 200, height: self.calcEventHeight(event: event))
+            .offset(x: CGFloat(index * 20), y: self.calcEventOffsetY(event: event))
+            .zIndex(Double(index))
         }
-        .offset(x: 80)
-        .frame(width: 0, height: hourHeight, alignment: .topLeading)
+      }
+      .offset(x: 80)
+      .frame(width: 0, height: hourHeight, alignment: .topLeading)
         
       Spacer()
     }
-
   }
   
   private func timeView(time: Date?) -> some View {
@@ -80,8 +76,8 @@ struct TimeLineMainView: View {
       return defaultEventHeight
     }
     
-    let components = calendar.dateComponents([.day, .hour, .minute], from: startTime, to: endTime)
-    let offset = (components.day ?? 0) * 24 + (components.hour ?? 0) + (components.minute ?? 0) / 60
+    let timeInterval = endTime.timeIntervalSince(startTime)
+    let offset = timeInterval / 3600
     
     guard offset > 0 else {
       return defaultEventHeight
@@ -113,10 +109,10 @@ struct TimeLineMainView: View {
       
     return allEvents
       .filter { event in
-      guard let start = event.startTime else {
-        return false
-      }
-      return start >= startOfHour && start < endOfHour
+        guard let start = event.startTime else {
+          return false
+        }
+        return start >= startOfHour && start < endOfHour
       }
       .sorted { $0.startTime! > $1.startTime! }
   }

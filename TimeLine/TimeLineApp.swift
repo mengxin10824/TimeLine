@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import TipKit
 
 @main
 struct TimeLineApp: App {
@@ -19,6 +20,12 @@ struct TimeLineApp: App {
           } catch {
               fatalError("Failed to initialize ModelContainer: \(error)")
           }
+        
+        do {
+          try Tips.configure()
+        } catch {
+            
+        }
       }
       
       var body: some Scene {
@@ -74,7 +81,7 @@ struct TimeLineApp: App {
       EventType(name: "WORK", hexString: Color.green.toHex())
   ]
   let previewEvent = [
-    Event(title: "Now", details: "1313618", eventType: previewTypes[0], startTime: .now, endTime: Calendar.current.date(byAdding: .hour, value: 2, to: .now)),
+    Event(title: "Now", details: "1313618", eventType: previewTypes[0], startTime: .now, endTime: Calendar.current.date(byAdding: .minute, value: 20, to: .now)),
     Event(title: "Now", details: "2618", eventType: previewTypes[0], startTime: .now, endTime: Calendar.current.date(byAdding: .hour, value: 3, to: .now))
   ]
   previewTypes.forEach { context.insert($0) }
@@ -86,3 +93,10 @@ struct TimeLineApp: App {
       // 可选：注入预览用的环境值
       .environment(\.calendar, Calendar(identifier: .gregorian))
 })
+
+
+struct TipDemo: Tip {
+  var title: Text
+  
+  
+}
