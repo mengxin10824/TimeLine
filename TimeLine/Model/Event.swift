@@ -22,9 +22,29 @@ final class Event: Identifiable {
   var createdTime: Date = Date()
   var startTime: Date?
   var endTime: Date?
+  var duration: TimeInterval? {
+    if let start = startTime, let end = endTime {
+      return end.timeIntervalSince(start)
+    } else {
+      return nil
+    }
+  }
+  
 
   // importance
   var importance: Int = 0
+  var priorityText: String {
+    switch self.importance {
+    case 0:
+      return "Low"
+    case 1:
+      return "Normal"
+    case 2:
+      return "High"
+    default:
+      return ""
+    }
+  }
 
   // isSubEvent
   @Relationship(inverse: \Event.subEvents)
@@ -53,12 +73,5 @@ final class Event: Identifiable {
     self.subEvents.append(event)
     event.parentOfEvent = self
   }
-  
-  func complete() {
-    self.isCompleted = true
-  }
-  
-  func uncomplete() {
-    self.isCompleted = false
-  }
+
 }

@@ -10,13 +10,20 @@ import SwiftUI
 
 #if os(iOS)
 struct ExportToPhoto: View {
-  let data: [[Double]]
+  let data: [[Int]]
   let tintColor: Color
   let secondaryTintColor: Color
 
   @State private var image: UIImage?
   @State private var isImagePickerPresented = false
   @State private var isImageSaved = false
+  
+  var days: Int {
+    return data.flatMap { $0 }.filter { $0 > 0 }.count
+  }
+  var tasks: Int {
+    return data.flatMap { $0 }.reduce(0, +)
+  }
 
   var body: some View {
     VStack {
@@ -66,7 +73,7 @@ struct ExportToPhoto: View {
       if success {
         isImageSaved = true
       } else {
-        print("保存失败: \(String(describing: error))")
+        print("Saved error: \(String(describing: error))")
       }
     }
   }
@@ -91,7 +98,7 @@ struct ExportToPhoto: View {
               .font(.system(size: 72, weight: .black))
 
             HStack(alignment: .lastTextBaseline) {
-              Text("20")
+              Text(days.description)
                 .font(.system(size: 84, weight: .black))
 
               Text("DAYS")
@@ -116,7 +123,7 @@ struct ExportToPhoto: View {
               Text("TASKS")
                 .font(.system(size: 32, weight: .black))
 
-              Text("100")
+              Text(tasks.description)
                 .font(.system(size: 84, weight: .black))
             }
 

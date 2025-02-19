@@ -9,6 +9,8 @@ import SwiftData
 import SwiftUI
 
 struct TimeLineMainView: View {
+  @EnvironmentObject private var viewModel: ViewModel
+  
   let hourHeight: CGFloat = 200
   
   let defaultEventHeight: CGFloat = 150
@@ -17,17 +19,8 @@ struct TimeLineMainView: View {
   let calendar: Calendar = .current
   let hour: Date
   
-  @Query(
-    filter: #Predicate<Event> {
-      $0.startTime != nil && $0.endTime != nil
-    },
-    sort: \Event.startTime,
-    order: .forward
-  )
-  private var allEvents: [Event]
-  
   var body: some View {
-    let eventsInThisHour = events(atHour: hour)
+    let eventsInThisHour = viewModel.events(atHour: hour)
     HStack(alignment: .top, spacing: 8) {
       // TimeLine Bar
       TimeLineMainBarView(hour: hour)
@@ -97,23 +90,5 @@ struct TimeLineMainView: View {
     }
     return CGFloat(offset) * hourHeight
   }
-  
-  private func events(atHour date: Date) -> [Event] {
-    guard let startOfHour = calendar.date(
-      from: calendar.dateComponents([.year, .month, .day, .hour], from: date)
-    ),
-      let endOfHour = calendar.date(byAdding: .hour, value: 1, to: startOfHour)
-    else {
-      return []
-    }
-      
-    return allEvents
-      .filter { event in
-        guard let start = event.startTime else {
-          return false
-        }
-        return start >= startOfHour && start < endOfHour
-      }
-      .sorted { $0.startTime! > $1.startTime! }
-  }
+
 }

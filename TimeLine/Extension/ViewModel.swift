@@ -15,6 +15,7 @@ class ViewModel: ObservableObject {
   var modelContext: ModelContext
 
   var allEvents: [Event] = []
+
   var allEventTypes: [EventType] = []
 
   private func checkAndInsertInitialData() {
@@ -49,9 +50,9 @@ class ViewModel: ObservableObject {
       fatalError("Failed to initialize ModelContainer: \(error)")
     }
     modelContext = ModelContext(container)
-    
+
     fetch()
-    
+
     checkAndInsertInitialData()
   }
 
@@ -75,6 +76,50 @@ class ViewModel: ObservableObject {
 }
 
 extension ViewModel {
+  func fetchLateEvent() -> Int? {
+    let now = Date()
+    return allEvents
+      .filter {
+        $0.endTime != nil && $0.endTime! < now
+      }
+      .count
+  }
+}
+
+extension ViewModel {
+  func addEvent(eventType: EventType? = nil) -> Event {
+    let currentEventTypes = eventType ?? allEventTypes.first!
+    let newEvent = Event(title: "", details: "", eventType: currentEventTypes)
+    modelContext.insert(newEvent)
+    try? modelContext.save()
+
+    return newEvent
+  }
+}
+
+extension ViewModel {
+  func events(atHour date: Date) -> [Event] {
+    let calendar = Calendar.current
+    guard let startOfHour = calendar.date(
+      from: calendar.dateComponents([.year, .month, .day, .hour], from: date)
+    ),
+      let endOfHour = calendar.date(byAdding: .hour, value: 1, to: startOfHour)
+    else {
+      return []
+    }
+
+    return allEvents
+      .filter { event in
+        guard let start = event.startTime else {
+          return false
+        }
+        return start >= startOfHour && start < endOfHour
+      }
+      .sorted { $0.startTime! > $1.startTime! }
+  }
+}
+
+extension ViewModel {
   func predictEventType(from text: String) -> EventType? {
     do {
       let config = MLModelConfiguration()
@@ -87,6 +132,25 @@ extension ViewModel {
     } catch {
       print("Error predicting event type: \(error.localizedDescription)")
       return nil
+    }
+  }
+}
+
+extension ViewModel {
+  var nowEvents: [Event] {
+    let now = Date()
+    return allEvents
+      .filter { event in
+        guard let startTime = event.startTime, let endTime = event.endTime else {
+          return false
+        }
+        return startTime <= now && endTime >= now
+      }
+  }
+
+  var openEvents: [Event] {
+    allEvents.filter { event in
+      event.endTime == nil && event.startTime != nil
     }
   }
 }

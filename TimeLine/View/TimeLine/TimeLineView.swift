@@ -10,15 +10,10 @@ import SwiftUI
 
 struct TimeLineView: View {
   @State var modifyEvent: Event?
-  @Environment(\.modelContext) private var modelContext
-
-  @Query var eventTypes: [EventType]
+  @Environment(\.modelContext) var modelContext
+  @EnvironmentObject var viewModel: ViewModel
 
   var body: some View {
-    ZStack(alignment: .top) {
-      TodayToolBarView()
-        .zIndex(2)
-
       ZStack(alignment: .bottom) {
         TodayScrollView()
 
@@ -26,7 +21,7 @@ struct TimeLineView: View {
         HStack {
           Spacer()
           Button {
-            addEvent()
+            modifyEvent = viewModel.addEvent()
           } label: {
             Image(systemName: "plus")
               .font(.title)
@@ -37,9 +32,9 @@ struct TimeLineView: View {
           }
           .contextMenu {
             Section("Quick Add By Event Type") {
-              ForEach(eventTypes) { eventType in
+              ForEach(viewModel.allEventTypes) { eventType in
                 Button("\(eventType.name)") {
-                  addEvent(eventType: eventType)
+                  modifyEvent = viewModel.addEvent(eventType: eventType)
                 }
               }
             }
@@ -52,14 +47,7 @@ struct TimeLineView: View {
       }) { currentEvent in
         AddEventView(event: currentEvent)
       }
-    }
   }
 
-  func addEvent(eventType: EventType? = nil) {
-    let currentEventTypes = eventType ?? eventTypes.first!
-    let newEvent = Event(title: "", details: "", eventType: currentEventTypes)
-    modelContext.insert(newEvent)
-    modifyEvent = newEvent
-    try? modelContext.save()
-  }
+  
 }

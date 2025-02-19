@@ -9,11 +9,11 @@ import SwiftData
 import SwiftUI
 
 struct HomeView: View {
-  @State private var selectedTab: Int = 0
+  @EnvironmentObject var viewModel: ViewModel
   
-  @Environment(\.modelContext) private var modelContext
+  @State private var selectedTab: Int = 0
   @State private var IncompleteEventCount: Int?
-      
+  
   var body: some View {
     TabView(selection: $selectedTab) {
       Tab(value: 0) {
@@ -23,9 +23,31 @@ struct HomeView: View {
       }.badge(IncompleteEventCount ?? 0)
             
       Tab(value: 1) {
-        NavigationStack { TimeLineView() }
+        NavigationStack {
+          TimeLineView()
+        }
       } label: {
         Label("TimeLine", systemImage: "timelapse")
+          .contextMenu {
+            Button("Back to Now", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90") {
+              
+            }
+            Button("Quick Add", systemImage: "plus") {
+              
+            }
+            
+            Section("Quick Filter") {
+              Button("Filter By Type", systemImage: "list.bullet.indent", action: {
+                
+              })
+              Button("Filter By Time", systemImage: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", action: {
+                
+              })
+              Button("Filter By Priority", systemImage: "flame", action: {
+                
+              })
+            }
+          }
       }
       
               
@@ -35,15 +57,9 @@ struct HomeView: View {
         Label("Profile", systemImage: "person.crop.circle")
       }
     }
-        
     .onAppear {
-      let now = Date()
-      let predicate = #Predicate<Event> {
-        $0.endTime != nil && $0.endTime! < now
-      }
-              
-      let fetchDescriptor = FetchDescriptor<Event>(predicate: predicate)
-      IncompleteEventCount = try? modelContext.fetchCount(fetchDescriptor)
+      self.IncompleteEventCount = viewModel.fetchLateEvent()
     }
   }
 }
+

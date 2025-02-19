@@ -31,14 +31,12 @@ struct AddEventView: View {
       }
     }
     Form {
-      // MARK: - Event Detail Section
 
       Section("Event Detail") {
-        // Title row
         HStack(alignment: .top) {
           Label("Title", systemImage: "note.text")
           TextField("Enter title", text: $event.title)
-            .lineLimit(3...5) // Adjust line limits as needed
+            .lineLimit(3...5)
         }
 
         // Details row
@@ -97,11 +95,14 @@ struct AddEventView: View {
           DatePicker(
             "End Time",
             selection: Binding(
-              get: { event.endTime ?? Date() },
+              get: { event.endTime ?? Date().addingTimeInterval(3600) },
               set: { event.endTime = $0 }
             ),
             displayedComponents: [.date, .hourAndMinute]
           )
+          
+          Label("Duration", systemImage: "clock")
+            .badge(event.duration?.description)
         } else {
           Button("Clear Time") {
             event.startTime = nil

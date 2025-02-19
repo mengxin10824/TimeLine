@@ -17,6 +17,7 @@ struct TodayScrollView: View {
   
   @State private var cachedHours: [Date]
   @State private var visibleHours = Set<Date>()
+  
     
   init(calendar: Calendar = .current) {
     self.calendar = calendar
@@ -63,8 +64,10 @@ struct TodayScrollView: View {
           }
         }
       }
+      .defaultScrollAnchor(.init(x: 0, y: 2000))
     }
     .scrollIndicators(.hidden)
+    .defaultScrollAnchor(.init(x: 0, y: 2000))
   }
 
   private func handleAppear(hour: Date, proxy: ScrollViewProxy) {
@@ -151,6 +154,11 @@ struct TodayScrollView: View {
     calendar.isDate(date, equalTo: Date(), toGranularity: .hour)
   }
 }
+
+class TodayScrollViewModel: ObservableObject {
+    
+}
+
 
 #Preview {
   TodayScrollView()

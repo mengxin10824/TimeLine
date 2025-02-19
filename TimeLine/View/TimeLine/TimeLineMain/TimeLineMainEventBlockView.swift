@@ -70,19 +70,6 @@ struct EventBlockView: View {
     }
     .frame(width: .infinity, height: .infinity)
   }
-
-  private func priorityText(for importance: Int) -> String {
-    switch importance {
-    case 0:
-      return "Low"
-    case 1:
-      return "Normal"
-    case 2:
-      return "High"
-    default:
-      return ""
-    }
-  }
 }
 
 struct EventTitleView: View {
@@ -116,7 +103,7 @@ struct EventInfoView: View {
   var body: some View {
     HStack {
       InfoItemView(label: "Event Type", value: event.eventType.name.uppercased(), tintColor: tintColor)
-      InfoItemView(label: "Priority", value: priorityText(for: event.importance).uppercased(), tintColor: tintColor)
+      InfoItemView(label: "Priority", value: event.priorityText, tintColor: tintColor)
       InfoItemView(label: "subEvent", value: event.subEvents.count.description, tintColor: tintColor)
     }
     .padding(15)

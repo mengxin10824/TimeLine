@@ -15,14 +15,27 @@ struct HeatMapView: View {
   
   let themeColors: [Color]
   
-  init(data: [[Double]], tintColor: Color = .accentColor) {
-    self.data = data
+  init(data: [[Int]], tintColor: Color = .accentColor) {
+    self.data = data.map { row in
+            row.map { value in
+                switch value {
+                case let x where x <= 0:
+                    return 0.0
+                case 1:
+                    return 0.5
+                case let x where x >= 2:
+                    return 1.0
+                default:
+                    return 0.0
+                }
+            }
+        }
     
     self.rowCount = data.count
     self.columnCount = data.first?.count ?? 0
     
-    self.themeColors = (0 ... 10).map { index in
-      tintColor.opacity(Double(index) / 10)
+    self.themeColors = (0 ... 3).map { index in
+      tintColor.opacity(Double(index) / 3)
     }
   }
     
@@ -55,19 +68,4 @@ struct HeatMapView: View {
     let index = min(Int(value * Double(themeColors.count - 1)), themeColors.count - 1)
     return themeColors[index]
   }
-}
-
-#Preview {
-  let data: [[Double]] = {
-    var data = [[Double]]()
-    for _ in 0..<7 {
-      var row = [Double]()
-      for _ in 0..<30 {
-        row.append(Double.random(in: 0 ... 1))
-      }
-      data.append(row)
-    }
-    return data
-  }()
-  HeatMapView(data: data)
 }

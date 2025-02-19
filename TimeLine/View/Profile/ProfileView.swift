@@ -71,7 +71,6 @@ struct ProfileView: View {
         }
       }
       .scrollContentBackground(.hidden)
-      .background(ProfileBackgroundView())
     }
     .onAppear {
       loadUserSetting()

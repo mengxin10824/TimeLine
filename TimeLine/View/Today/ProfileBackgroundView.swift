@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ProfileBackgroundView: View {
+struct BackgroundView: View {
   var body: some View {
     ZStack {
       MeshGradient(
