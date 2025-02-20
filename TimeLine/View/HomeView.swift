@@ -28,28 +28,7 @@ struct HomeView: View {
         }
       } label: {
         Label("TimeLine", systemImage: "timelapse")
-          .contextMenu {
-            Button("Back to Now", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90") {
-              
-            }
-            Button("Quick Add", systemImage: "plus") {
-              
-            }
-            
-            Section("Quick Filter") {
-              Button("Filter By Type", systemImage: "list.bullet.indent", action: {
-                
-              })
-              Button("Filter By Time", systemImage: "clock.arrow.trianglehead.2.counterclockwise.rotate.90", action: {
-                
-              })
-              Button("Filter By Priority", systemImage: "flame", action: {
-                
-              })
-            }
-          }
       }
-      
               
       Tab(value: 1) {
         ProfileView()

@@ -12,151 +12,179 @@ import SwiftUI
 struct AddEventView: View {
   @Environment(\.modelContext) private var modelContext
   @Environment(\.dismiss) private var dismiss
+  
+  @EnvironmentObject var viewModel: ViewModel
 
   @Bindable var event: Event
 
   @State private var hasTime: Bool = false
-
-  @Query private var allEventType: [EventType] = []
+  @State private var showErrorAlert = false
+  @State private var errorMessage = ""
 
   var body: some View {
-    HStack {
-      Button("Cancel") {
-        dismiss()
+    NavigationStack {
+      Form {
+        eventDetailsSection
+        timeDetailsSection
+        subEventsSection
+        prioritySection
       }
-      Spacer()
-      Button("Save") {
-        try? modelContext.save()
-        dismiss()
+      .navigationTitle(event.title.isEmpty ? "New Event" : "Edit Event")
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbar {
+        ToolbarItem(placement: .cancellationAction) {
+          Button("Cancel") { dismiss() }
+        }
+        ToolbarItem(placement: .confirmationAction) {
+          Button("Save", action: saveEvent)
+        }
       }
+      .alert("Save Error", isPresented: $showErrorAlert) {
+        Button("OK") {}
+      } message: {
+        Text(errorMessage)
+      }
+      .onAppear(perform: setupInitialState)
+      .onChange(of: hasTime, handleTimeToggle)
     }
-    Form {
+  }
+  
+  // MARK: - View Components
 
-      Section("Event Detail") {
-        HStack(alignment: .top) {
-          Label("Title", systemImage: "note.text")
-          TextField("Enter title", text: $event.title)
-            .lineLimit(3...5)
-        }
-
-        // Details row
-        VStack(alignment: .leading, spacing: 6) {
-          HStack {
-            Label("Details", systemImage: "info.circle")
-            Spacer()
-          }
-          TextField(
-            "Additional details",
-            text: $event.details,
-            prompt: Text("Required"),
-            axis: .vertical
-          )
-          .lineLimit(5...10)
-//           .onChange(of: event.details) { newValue in
-//               if let predictedType = somePredictEventTypeFunction(from: newValue) {
-//                   event.eventType = predictedType
-//               }
-//           }
-        }
-
-        // Event Type Picker
-        HStack {
-          Label("Event Type", systemImage: "list.bullet")
-          Picker("Select Type", selection: $event.eventType) {
-            ForEach(allEventType) { eventType in
-              Text(eventType.name).tag(eventType)
-            }
-          }
-          .pickerStyle(MenuPickerStyle())
-        }
-      }
-
-      // MARK: - Time Details Section
-
-      Section("Time Details") {
-        // Switch between "With Time" and "Without Time"
-        Picker("Event Timing", selection: $hasTime) {
-          Text("With Time").tag(true)
-          Text("Without Time").tag(false)
-        }
-        .pickerStyle(SegmentedPickerStyle())
-        .padding()
-
-        if hasTime {
-          DatePicker(
-            "Start Time",
-            selection: Binding(
-              get: { event.startTime ?? Date() },
-              set: { event.startTime = $0 }
-            ),
-            displayedComponents: [.date, .hourAndMinute]
-          )
-
-          DatePicker(
-            "End Time",
-            selection: Binding(
-              get: { event.endTime ?? Date().addingTimeInterval(3600) },
-              set: { event.endTime = $0 }
-            ),
-            displayedComponents: [.date, .hourAndMinute]
-          )
+  private var eventDetailsSection: some View {
+    Section("Event Detail") {
+      TextField("Title", text: $event.title, prompt: Text("Enter title"))
+        .lineLimit(3...5)
           
+      TextField("Details",
+                text: $event.details,
+                prompt: Text("Additional details"),
+                axis: .vertical)
+        .lineLimit(5...10)
+          
+      Picker("Event Type", selection: $event.eventType) {
+        ForEach(viewModel.allEventTypes) { eventType in
+          Text(eventType.name).tag(eventType)
+        }
+      }
+    }
+  }
+  
+  private var timeDetailsSection: some View {
+    Section("Time Details") {
+      Picker("Event Timing", selection: $hasTime) {
+        Text("With Time").tag(true)
+        Text("Without Time").tag(false)
+      }
+      .pickerStyle(.segmented)
+          
+      if hasTime {
+        DatePicker("Start Time",
+                   selection: Binding(
+                     get: { event.startTime ?? Date() },
+                     set: { event.startTime = $0 }),
+                   displayedComponents: [.date, .hourAndMinute])
+              
+        DatePicker("End Time",
+                   selection: Binding(
+                     get: { event.endTime ?? Date().addingTimeInterval(3600) },
+                     set: { event.endTime = $0 }),
+                   in: (event.startTime ?? Date(timeIntervalSince1970: 0))...,
+                   displayedComponents: [.date, .hourAndMinute])
+              
+        if let duration = event.duration {
           Label("Duration", systemImage: "clock")
-            .badge(event.duration?.description)
-        } else {
-          Button("Clear Time") {
-            event.startTime = nil
-            event.endTime = nil
-          }
+            .badge(duration)
         }
       }
-
-      // MARK: - SubEvents Section
-
-      Section("SubEvent") {
-        Button {
-          let newSubEvent = Event(
-            title: "New SubEvent",
-            details: "",
-            eventType: event.eventType,
-            startTime: nil,
-            endTime: nil,
-            parentOfEvent: event
-          )
-          event.subEvents.append(newSubEvent)
+    }
+  }
+  
+  private var subEventsSection: some View {
+    Section("Sub Events") {
+      Button(action: addSubEvent) {
+        Label("Add Sub Event", systemImage: "plus")
+      }
+              
+      ForEach($event.subEvents) { $subEvent in
+        NavigationLink {
+          AddEventView(event: subEvent)
         } label: {
-          Label(
-            event.subEvents.isEmpty ? "New SubEvent" : "Add SubEvent",
-            systemImage: "plus"
-          )
-        }
-
-        ForEach($event.subEvents) { $sub in
-          Text(sub.title)
-        }
-        .onDelete { indexSet in
-          event.subEvents.remove(atOffsets: indexSet)
-        }
-      }
-
-      Section("Priority") {
-        HStack {
-          Label("Priority", systemImage: "flame")
-          Spacer()
-          Picker("Priority", selection: $event.importance) {
-            Text("Low").tag(0)
-            Text("Medium").tag(1)
-            Text("High").tag(2)
+          VStack(alignment: .leading) {
+            Text(subEvent.title)
+              .font(.headline)
+            Text(subEvent.eventType.name)
+              .font(.caption)
+              .foregroundStyle(.secondary)
           }
         }
       }
+      .onDelete(perform: deleteSubEvents)
     }
-    .onAppear {
-      self.hasTime = event.startTime != nil || event.endTime != nil
+  }
+  
+  private var prioritySection: some View {
+    Section("Priority") {
+      Picker("Importance", selection: $event.importance) {
+        ForEach(0 ..< 3) { level in
+          Text(["Low", "Medium", "High"][level]).tag(level)
+        }
+      }
+      .pickerStyle(.segmented)
     }
-    
-//    func somePredictEventTypeFunction(from details: String) -> EventType? {
-////      if let pre
-//    }
+  }
+  
+  private func setupInitialState() {
+    hasTime = event.startTime != nil || event.endTime != nil
+    validateEventTypes()
+  }
+  
+  private func validateEventTypes() {
+    if viewModel.allEventTypes.isEmpty {
+      errorMessage = "No event types available"
+      showErrorAlert = true
+    }
+  }
+  
+  private func handleTimeToggle() {
+    if !hasTime {
+      event.startTime = nil
+      event.endTime = nil
+    } else {
+      let now = Date()
+      event.startTime = now
+      event.endTime = now.addingTimeInterval(3600)
+    }
+  }
+  
+  private func addSubEvent() {
+    let newSubEvent = Event(
+      title: "New Sub Event",
+      details: "",
+      eventType: event.eventType,
+      startTime: nil,
+      endTime: nil,
+      parentOfEvent: event)
+    event.addSubEvent(newSubEvent)
+  }
+  
+  private func deleteSubEvents(at offsets: IndexSet) {
+    withAnimation {
+      for index in offsets {
+        let subEvent = event.subEvents[index]
+        modelContext.delete(subEvent)
+      }
+      event.subEvents.remove(atOffsets: offsets)
+    }
+  }
+  
+  private func saveEvent() {
+    do {
+      try modelContext.save()
+      dismiss()
+    } catch {
+      errorMessage = "Failed to save event: \(error.localizedDescription)"
+      showErrorAlert = true
+    }
   }
 }

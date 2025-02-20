@@ -8,53 +8,80 @@
 import SwiftUI
 
 struct TimeLineMainBarView: View {
-  @State var hour: Date
+  let hour: Date
+  let hourValue: Int
 
-  var isPast: Bool = false
-  var isNow: Bool = false
+  init(hour: Date) {
+    self.hour = hour
+    self.hourValue = Calendar.current.component(.hour, from: hour)
+  }
 
   var body: some View {
     HStack(alignment: .top, spacing: 0) {
-      BarBackgroundView()
-        .frame(width: 20)
+      ZStack {
+        AnyShape(barShape())
+          .fill(AnyShapeStyle(fillStyle()))
+      }
+      .frame(width: 20)
 
-      Text(hour.toRelativeDateString())
+      let dateString = hour.toRelativeDateString()
+      
+      Text(dateString)
         .foregroundStyle(.gray)
-        .font(.system(size: 10, weight: .bold))
+        .font(
+          dateString == "At Now" ?
+            .system(size: 21, weight: .black) :
+            .system(size: 12, weight: .bold)
+        )
         .fixedSize()
         .multilineTextAlignment(.leading)
         .offset(x: 10)
         .frame(width: 0, alignment: .leading)
     }
+    .padding(.top, hourValue == 0 ? 50: 0)
   }
 
-  func BarBackgroundView() -> some View {
-    let calendar = Calendar.current
-    let hourComponents = calendar.dateComponents([.hour], from: hour)
-    let hourValue = hourComponents.hour ?? 0
-
+  private func barShape() -> any Shape {
     if hourValue == 0 {
-      return AnyView(
-        UnevenRoundedRectangle(
-          topLeadingRadius: .infinity,
-          bottomLeadingRadius: 0,
-          bottomTrailingRadius: 0,
-          topTrailingRadius: .infinity,
-          style: .continuous
-        ).padding(.top, 20)
+      return UnevenRoundedRectangle(
+        topLeadingRadius: .infinity,
+        topTrailingRadius: .infinity
       )
     } else if hourValue == 23 {
-      return AnyView(
-        UnevenRoundedRectangle(
-          topLeadingRadius: 0,
-          bottomLeadingRadius: .infinity,
-          bottomTrailingRadius: .infinity,
-          topTrailingRadius: 0,
-          style: .continuous
-        )
+      return UnevenRoundedRectangle(
+        bottomLeadingRadius: .infinity,
+        bottomTrailingRadius: .infinity
       )
     } else {
-      return AnyView(Rectangle())
+      return Rectangle()
+    }
+  }
+
+  private func fillStyle() -> any ShapeStyle {
+    let currentDate = Date()
+    let currentHour = Calendar.current.component(.hour, from: currentDate)
+    let currentDay = Calendar.current.component(.day, from: currentDate)
+    let hourDay = Calendar.current.component(.day, from: hour)
+
+    if currentDay == hourDay && hourValue == currentHour {
+      let currentMinute = Calendar.current.component(.minute, from: currentDate)
+      let fraction = Double(currentMinute) / 60.0
+
+      return LinearGradient(
+        gradient: Gradient(stops: [
+          Gradient.Stop(color: .black, location: 0),
+          Gradient.Stop(color: .black, location: fraction - 0.1),
+          Gradient.Stop(color: .green.opacity(0.6), location: fraction),
+          Gradient.Stop(color: .gray, location: 1)
+        ]),
+        startPoint: .top,
+        endPoint: .bottom
+      )
+    } else if currentDay > hourDay || (currentDay == hourDay && hourValue < currentHour) {
+      return Color.black
+    } else {
+      return Color.gray
     }
   }
 }
+

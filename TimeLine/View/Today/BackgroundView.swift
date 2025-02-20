@@ -29,7 +29,6 @@ struct BackgroundView: View {
         .interpolation(.none)
         .resizable(resizingMode: .tile)
         .blendMode(.screen)
-        
       
     }
     .opacity(0.45)
@@ -45,10 +44,11 @@ struct BackgroundView: View {
             
       for x in 0..<Int(size.width) {
         for y in 0..<Int(size.height) {
-          let shouldDrawNoise = Double.random(in: 0...1) > 0.95
+          // P
+          let shouldDrawNoise = Double.random(in: 0...1) > 0.9
           if shouldDrawNoise {
             let grayValue = CGFloat.random(in: 0...1)
-            cgContext.setFillColor(UIColor(white: grayValue, alpha: 1.0).cgColor)
+            cgContext.setFillColor(UIColor(white: grayValue, alpha: 0.6).cgColor)
             cgContext.fill(CGRect(x: x, y: y, width: 1, height: 1))
           }
         }

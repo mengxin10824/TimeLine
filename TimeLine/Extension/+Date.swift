@@ -14,6 +14,12 @@ extension Date {
     return formatter.string(from: self)
   }
   
+  func toPinnedViewString() -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "EEEE MMM d, 'Week' W"
+    return formatter.string(from: self)
+  }
+  
   func toRelativeDateString() -> String {
     let calendar = Calendar.current
         
@@ -44,4 +50,33 @@ extension Date {
       }
     }
   }
+  
+  func relativeDateDifference(to date: Date) -> String {
+         let totalSeconds = Int(date.timeIntervalSince(self))
+         let seconds = abs(totalSeconds)
+         
+         let days = seconds / (3600 * 24)
+         let hours = (seconds % (3600 * 24)) / 3600
+         let minutes = (seconds % 3600) / 60
+         
+         var parts = [String]()
+         
+         if days > 0 {
+             let unit = days == 1 ? "Day" : "Days"
+             parts.append("\(days) \(unit)")
+         }
+         
+         if hours > 0 {
+             let unit = hours == 1 ? "Hour" : "Hours"
+             parts.append("\(hours) \(unit)")
+         }
+         
+         if minutes > 0 || parts.isEmpty {
+             parts.append("\(minutes) Minutes")
+         }
+         
+         return parts.joined(separator: " ")
+     }
+  
+  
 }

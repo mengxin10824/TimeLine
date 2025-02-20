@@ -22,9 +22,9 @@ final class Event: Identifiable {
   var createdTime: Date = Date()
   var startTime: Date?
   var endTime: Date?
-  var duration: TimeInterval? {
+  var duration: String? {
     if let start = startTime, let end = endTime {
-      return end.timeIntervalSince(start)
+      return start.relativeDateDifference(to: end)
     } else {
       return nil
     }

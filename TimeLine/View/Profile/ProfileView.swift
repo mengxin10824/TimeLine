@@ -70,7 +70,6 @@ struct ProfileView: View {
           }
         }
       }
-      .scrollContentBackground(.hidden)
     }
     .onAppear {
       loadUserSetting()
@@ -97,7 +96,6 @@ struct ProfileView: View {
   }
   
   func loadUserData() {
-            
     let calendar = Calendar.current
     let now = Date()
     guard let startDate = calendar.date(byAdding: .day, value: -140, to: now) else { return }

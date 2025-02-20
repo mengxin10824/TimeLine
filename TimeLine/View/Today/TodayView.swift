@@ -24,11 +24,12 @@ struct TodayView: View {
           Spacer()
           
           Text(Date().toTodayString())
-            .font(.system(size: 24, weight: .bold))
+            .font(.system(size: 20, weight: .bold))
+            .foregroundStyle(.secondary)
         }
         
         VStack(alignment: .leading, spacing: 15) {
-          let nowEvents = viewModel.nowEvents
+          let nowEvents = Array(viewModel.nowEvents.prefix(3))
           HStack {
             Text("On Going")
               .foregroundStyle(.secondary)
@@ -40,9 +41,9 @@ struct TodayView: View {
         }
         
         VStack(alignment: .leading, spacing: 15) {
-          let openEvents = viewModel.openEvents
+          let openEvents = Array(viewModel.openEvents.prefix(3))
           HStack {
-            Text("On Going")
+            Text("Open Event")
               .foregroundStyle(.secondary)
               .font(.system(size: 36, weight: .black))
             Spacer()
@@ -73,48 +74,46 @@ struct TodayView: View {
         .frame(height: 200)
     }
     
-    ForEach(events) { event in
-      VStack(alignment: .leading, spacing: 10) {
-        HStack {
-          Text(event.title)
-            .font(.title2)
-            .fontWeight(.bold)
+    VStack(spacing: 5) {
+      ForEach(events) { event in
+        VStack(alignment: .leading, spacing: 5) {
+          HStack {
+            Text(event.title)
+              .font(.title2)
+              .fontWeight(.bold)
+              
+            Spacer()
+              
+            Text(event.importance == 0 ? "LOW" :
+              event.importance == 1 ? "MEDIUM" : "HIGH")
+              .font(.subheadline)
+              .fontWeight(.semibold)
+              .padding(.horizontal, 12)
+              .padding(.vertical, 4)
+              .background(event.eventType.color.opacity(0.2))
+              .clipShape(RoundedRectangle(cornerRadius: 8))
+          }
             
-          Spacer()
-            
-          Text(event.importance == 0 ? "LOW" :
-            event.importance == 1 ? "MEDIUM" : "HIGH")
-            .font(.subheadline)
-            .fontWeight(.semibold)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 4)
-            .background(event.eventType.color.opacity(0.2))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
-        }
-          
-        if let startTime = event.startTime,
-           let endTime = event.endTime
-        {
-          Text("\(startTime.formatted(date: .omitted, time: .shortened)) - \(endTime.formatted(date: .omitted, time: .shortened))")
-            .font(.headline)
-            .foregroundStyle(.secondary)
-        }
-          
-        Text(event.details)
-          .font(.body)
+          HStack(spacing: 8) {
+            if let startTime = event.startTime,
+               let endTime = event.endTime
+            {
+              Text("\(startTime.formatted(date: .omitted, time: .shortened)) - \(endTime.formatted(date: .omitted, time: .shortened))")
+            }
+            Text(event.eventType.name)
+          }
+          .font(.headline)
           .foregroundStyle(.secondary)
+        }
+        .padding()
+        .background(event.eventType.color.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 25))
+        .onTapGesture {
+          self.seletedEvent = event
+        }
       }
-      .padding()
-      .background(event.eventType.color.opacity(0.1))
       .clipShape(RoundedRectangle(cornerRadius: 25))
-      .onTapGesture {
-        self.seletedEvent = event
-      }
     }
-    .padding()
-    .background()
-    .clipShape(RoundedRectangle(cornerRadius: 25))
-    .frame(height: 200)
   }
 }
 

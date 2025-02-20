@@ -18,9 +18,13 @@ struct TodayScrollView: View {
   @State private var cachedHours: [Date]
   @State private var visibleHours = Set<Date>()
   
-    
-  init(calendar: Calendar = .current) {
-    self.calendar = calendar
+  @State var currentDate: Date = .now
+  
+  @Binding var isBackToNow: Bool
+  @Binding var filterType: FilterType
+  
+  init(isBackToNow: Binding<Bool>, filterType: Binding<FilterType>) {
+    self.calendar = .current
     let todayStart = calendar.startOfDay(for: .now)
     var dates: [Date] = []
         
@@ -36,15 +40,17 @@ struct TodayScrollView: View {
       }
     }
     self.cachedHours = dates
-  }
     
+    self._isBackToNow = isBackToNow
+    self._filterType = filterType
+  }
+
   var body: some View {
     ScrollView {
       ScrollViewReader { proxy in
         LazyVStack(spacing: 0) {
           ForEach(cachedHours, id: \.self) { hour in
             TimeLineMainView(hour: hour)
-              .frame(width: .infinity)
               .padding(.leading, 20)
               .id(hour)
               .onAppear {
@@ -53,7 +59,6 @@ struct TodayScrollView: View {
               .onDisappear {
                 visibleHours.remove(hour)
               }
-            
           }
         }
         .padding(.vertical)
@@ -63,15 +68,34 @@ struct TodayScrollView: View {
             scrollToCurrentHour(proxy: proxy)
           }
         }
+        .onChange(of: isBackToNow) { _, isBackToNow in
+          if isBackToNow {
+            scrollToCurrentHour(proxy: proxy, animation: .easeInOut)
+            self.isBackToNow = false
+          }
+        }
+        .onChange(of: filterType) { oldValue, newValue in
+          if oldValue != .none && newValue != .none {
+            
+          } else if newValue == FilterType.byPriority {
+            
+          } else if newValue == FilterType.byTime {
+            
+          } else if newValue == FilterType.byPriority {
+            
+          }
+          self.filterType = .none
+        }
       }
-      .defaultScrollAnchor(.init(x: 0, y: 2000))
     }
+    .background(.gray.opacity(0.1))
     .scrollIndicators(.hidden)
-    .defaultScrollAnchor(.init(x: 0, y: 2000))
+    .navigationTitle(currentDate.toPinnedViewString())
   }
 
   private func handleAppear(hour: Date, proxy: ScrollViewProxy) {
     visibleHours.insert(hour)
+    currentDate = hour
         
     if cachedHours.prefix(prefetchThreshold).contains(hour) && !isLoadingUp {
       loadMoreUp(proxy: proxy)
@@ -101,9 +125,7 @@ struct TodayScrollView: View {
     }
         
     DispatchQueue.main.async {
-      withAnimation(.none) {
-        cachedHours.insert(contentsOf: newHours, at: 0)
-      }
+      cachedHours.insert(contentsOf: newHours, at: 0)
       proxy.scrollTo(originalFirstHour, anchor: .top)
       isLoadingUp = false
     }
@@ -128,20 +150,20 @@ struct TodayScrollView: View {
     }
         
     DispatchQueue.main.async {
-      withAnimation(.none) {
-        cachedHours.append(contentsOf: newHours)
-      }
+      cachedHours.append(contentsOf: newHours)
       isLoadingDown = false
     }
   }
     
-  private func scrollToCurrentHour(proxy: ScrollViewProxy) {
+  private func scrollToCurrentHour(proxy: ScrollViewProxy, animation: Animation? = nil) {
     let currentHour = calendar.dateComponents([.hour], from: Date()).hour!
     if let targetHour = cachedHours.first(where: {
       calendar.component(.hour, from: $0) == currentHour &&
         calendar.isDate($0, inSameDayAs: Date())
     }) {
-      proxy.scrollTo(targetHour, anchor: .center)
+      withAnimation(animation) {
+        proxy.scrollTo(targetHour, anchor: .center)
+      }
     }
   }
     
@@ -153,13 +175,4 @@ struct TodayScrollView: View {
   private func isCurrentHour(_ date: Date) -> Bool {
     calendar.isDate(date, equalTo: Date(), toGranularity: .hour)
   }
-}
-
-class TodayScrollViewModel: ObservableObject {
-    
-}
-
-
-#Preview {
-  TodayScrollView()
 }

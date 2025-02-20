@@ -68,7 +68,6 @@ struct EventBlockView: View {
     }) { currentEvent in
       AddEventView(event: currentEvent)
     }
-    .frame(width: .infinity, height: .infinity)
   }
 }
 
