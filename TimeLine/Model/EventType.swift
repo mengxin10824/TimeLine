@@ -12,7 +12,6 @@ import SwiftUI
 final class EventType: Identifiable, Hashable {
   @Attribute(.unique)
   var id: UUID
-  
   var name: String
 
   @Relationship(deleteRule: .cascade, inverse: \Event.eventType)

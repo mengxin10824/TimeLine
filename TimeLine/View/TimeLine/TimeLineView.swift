@@ -4,8 +4,6 @@
 //
 //  Created by mengxin10824 on 2025/1/21.
 //
-
-import SwiftData
 import SwiftUI
 
 struct TimeLineView: View {
@@ -15,13 +13,14 @@ struct TimeLineView: View {
 
   @State var isBackToNow: Bool = false
   @State var filterType: FilterType = .none
-  
   var body: some View {
     ZStack(alignment: .bottom) {
-      TodayScrollView(isBackToNow: $isBackToNow, filterType: $filterType)
+      TodayScrollView(isBackToNow: $isBackToNow)
+        .environment(\.filterType, filterType)
 
       HStack {
         Button {
+          isBackToNow = true
           if filterType != .none {
             filterType = .none
           } else {
@@ -30,6 +29,7 @@ struct TimeLineView: View {
         } label: {
           Image(systemName: "line.3.horizontal.decrease")
             .font(.title)
+            .frame(width: 30, height: 30)
             .foregroundStyle(.white)
             .padding()
             .background(.green)
@@ -60,6 +60,7 @@ struct TimeLineView: View {
         } label: {
           Image(systemName: "plus")
             .font(.title)
+            .frame(width: 30, height: 30)
             .foregroundStyle(.white)
             .padding()
             .background(.blue)

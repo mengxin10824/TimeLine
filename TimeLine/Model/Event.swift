@@ -45,9 +45,22 @@ final class Event: Identifiable {
       return ""
     }
   }
+  var priorityColor: Color {
+    switch self.importance {
+    case 0:
+      return .red.opacity(0.2)
+    case 1:
+      return .red.opacity(0.3)
+    case 2:
+      return .red.opacity(0.5)
+    default:
+      return .clear
+    }
+  }
+    
 
   // isSubEvent
-  @Relationship(inverse: \Event.subEvents)
+  @Relationship(deleteRule: .nullify)
   weak var parentOfEvent: Event?
 
   @Relationship(deleteRule: .cascade)

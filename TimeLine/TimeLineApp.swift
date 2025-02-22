@@ -12,13 +12,6 @@ import TipKit
 @main
 struct TimeLineApp: App {
   @StateObject var viewModel: ViewModel = ViewModel()
-
-  init() {
-    do {
-      try Tips.configure()
-    } catch {}
-  }
-      
   var body: some Scene {
     WindowGroup {
       HomeView()

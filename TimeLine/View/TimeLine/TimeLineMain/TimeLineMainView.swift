@@ -9,7 +9,9 @@ import SwiftData
 import SwiftUI
 
 struct TimeLineMainView: View {
-  @EnvironmentObject private var viewModel: ViewModel
+  @State var events: [Event]
+  @State var hour: Date
+  @Environment(\.filterType) var filterType: FilterType
   
   let hourHeight: CGFloat = 200
   
@@ -17,34 +19,51 @@ struct TimeLineMainView: View {
   let defaultEventWidth: CGFloat = 400
   
   let calendar: Calendar = .current
-  let hour: Date
+  
+  let eventsInThisHour: [Event] = []
   
   var body: some View {
-    let eventsInThisHour = viewModel.events(atHour: hour)
     HStack(alignment: .top, spacing: 8) {
-      // TimeLine Bar
       TimeLineMainBarView(hour: hour)
-        .frame(height: hourHeight)
+        .frame(height: hourHeight, alignment: .leading)
       
-      ZStack {
-        ForEach(Array(eventsInThisHour.enumerated()), id: \.offset) { index, event in
+      ZStack(alignment: .leading) {
+        ForEach(Array(events.enumerated()), id: \.offset) { index, event in
           EventBlockView(event: event)
+            .frame(height: self.calcEventHeight(event: event))
             .overlay(alignment: .leading) {
               VStack {
-                timeView(time: event.startTime).offset(y: -20)
+                timeView(time: event.startTime)
                 Spacer()
-                timeView(time: event.endTime).offset(y: 20)
+                timeView(time: event.endTime)
               }
             }
-            .frame(width: 200, height: self.calcEventHeight(event: event))
-            .offset(x: CGFloat(index * 20), y: self.calcEventOffsetY(event: event))
+            .offset(x: CGFloat(index * 250 + 60), y: self.calcEventOffsetY(event: event))
             .zIndex(Double(index))
+            .transition(.move(edge: .leading))
         }
       }
-      .offset(x: 80)
-      .frame(width: 0, height: hourHeight, alignment: .topLeading)
-        
-      Spacer()
+      .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    .padding(.leading, 5)
+    .onChange(of: filterType) { oldValue, newValue in
+      withAnimation(.easeInOut(duration: 0.3)) {
+        switch newValue {
+        case .byPriority:
+          events.sort { $0.importance > $1.importance }
+        case .byType:
+          events.sort { $0.eventType.name < $1.eventType.name }
+        case .byTime:
+          events.sort {
+            guard let s0 = $0.startTime, let s1 = $1.startTime else { return false }
+            return s0 < s1
+          }
+        case .none:
+          if oldValue != .none {
+            events.sort { $0.createdTime < $1.createdTime }
+          }
+        }
+      }
     }
   }
   
@@ -90,5 +109,4 @@ struct TimeLineMainView: View {
     }
     return CGFloat(offset) * hourHeight
   }
-
 }

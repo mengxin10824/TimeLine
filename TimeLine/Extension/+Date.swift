@@ -34,9 +34,9 @@ extension Date {
     let diffComponents = calendar.dateComponents([.hour], from: adjustedCurrent, to: adjustedTarget)
     guard let diffHours = diffComponents.hour else { return "At Now" }
         
-    if abs(diffHours) >= 48 {
+    if abs(diffHours) >= 12 {
       let formatter = DateFormatter()
-      formatter.dateFormat = "MMM d HH:mm"
+      formatter.dateFormat = "MMM d '\n' HH:mm"
       return formatter.string(from: adjustedTarget)
     } else {
       switch diffHours {
@@ -45,8 +45,10 @@ extension Date {
       default:
         let sign = diffHours > 0 ? "+" : "-"
         let absoluteHours = abs(diffHours)
-        let hourString = absoluteHours == 1 ? "hour" : "hours"
-        return "\(sign)\(absoluteHours) \(hourString)"
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        let dateString = formatter.string(from: adjustedTarget)
+        return "\(dateString)\n\(sign)\(absoluteHours) h"
       }
     }
   }

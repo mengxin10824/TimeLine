@@ -30,12 +30,12 @@ struct TimeLineMainBarView: View {
         .foregroundStyle(.gray)
         .font(
           dateString == "At Now" ?
-            .system(size: 21, weight: .black) :
-            .system(size: 12, weight: .bold)
+            .system(size: 16, weight: .black) :
+            .system(size: 10, weight: .bold)
         )
         .fixedSize()
         .multilineTextAlignment(.leading)
-        .offset(x: 10)
+        .offset(x: 5)
         .frame(width: 0, alignment: .leading)
     }
     .padding(.top, hourValue == 0 ? 50: 0)

@@ -9,31 +9,31 @@ import CoreML
 import SwiftData
 import SwiftUI
 
+@MainActor
 @Observable
 class ViewModel: ObservableObject {
   let container: ModelContainer
   var modelContext: ModelContext
 
   var allEvents: [Event] = []
-
   var allEventTypes: [EventType] = []
 
   private func checkAndInsertInitialData() {
     guard allEventTypes.isEmpty else { return }
 
-    let presetTypes = [
-      EventType(name: "STUDY", hexString: Color.blue.toHex()),
-      EventType(name: "WORK", hexString: Color.green.toHex()),
-      EventType(name: "FITNESS", hexString: Color.orange.toHex()),
-      EventType(name: "LIFE", hexString: Color.yellow.toHex()),
-      EventType(name: "LEISURE", hexString: Color.purple.toHex()),
-      EventType(name: "SOCIAL", hexString: Color.red.toHex()),
-      EventType(name: "FINANCE", hexString: Color.gray.toHex()),
-      EventType(name: "CREATIVITY", hexString: Color.pink.toHex())
+    let presetTypes: [(String, Color)] = [
+        ("STUDY", Color.blue),
+        ("WORK", Color.green),
+        ("FITNESS", Color.orange),
+        ("LIFE", Color.yellow),
+        ("LEISURE", Color.purple),
+        ("SOCIAL", Color.red),
+        ("FINANCE", Color.gray),
+        ("CREATIVITY", Color.pink)
     ]
 
     for type in presetTypes {
-      modelContext.insert(type)
+      addEventType(name: type.0, color: type.1)
     }
 
     do {
@@ -44,6 +44,7 @@ class ViewModel: ObservableObject {
   }
 
   init() {
+#if !DEBUG
     do {
       container = try ModelContainer(for: Event.self, EventType.self)
     } catch {
@@ -54,6 +55,18 @@ class ViewModel: ObservableObject {
     fetch()
 
     checkAndInsertInitialData()
+#else
+    do {
+      container = try ModelContainer(for: Event.self, EventType.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+    } catch {
+      fatalError("Failed to initialize ModelContainer: \(error)")
+    }
+    modelContext = ModelContext(container)
+
+    fetch()
+
+    checkAndInsertInitialData()
+#endif
   }
 
   func fetch() {
@@ -73,6 +86,44 @@ class ViewModel: ObservableObject {
       print("Failed to fetch event types: \(error)")
     }
   }
+
+  func addEvent(eventType: EventType? = nil) -> Event {
+    do {
+      let selectedType = eventType ?? allEventTypes.first!
+      let newEvent = Event(title: "New Event", details: "", eventType: selectedType)
+      modelContext.insert(newEvent)
+      try modelContext.save()
+      fetch()
+      return newEvent
+    } catch {
+      print("add event error: \(error)")
+      fatalError()
+    }
+  }
+
+  func addEventType(name: String, color: Color) {
+    do {
+      let newType = EventType(
+        name: name.uppercased(),
+        hexString: color.toHex()
+      )
+      modelContext.insert(newType)
+      try modelContext.save()
+      fetch()
+    } catch {
+      print("add event type error: \(error)")
+    }
+  }
+  
+  func deleteEvent(_ event: Event) {
+    do {
+      modelContext.delete(event)
+      try modelContext.save()
+      fetch()
+    } catch {
+      print("delete event error: \(error)")
+    }
+  }
 }
 
 extension ViewModel {
@@ -83,17 +134,6 @@ extension ViewModel {
         $0.endTime != nil && $0.endTime! < now
       }
       .count
-  }
-}
-
-extension ViewModel {
-  func addEvent(eventType: EventType? = nil) -> Event {
-    let currentEventTypes = eventType ?? allEventTypes.first!
-    let newEvent = Event(title: "", details: "", eventType: currentEventTypes)
-    modelContext.insert(newEvent)
-    try? modelContext.save()
-
-    return newEvent
   }
 }
 
@@ -115,7 +155,6 @@ extension ViewModel {
         }
         return start >= startOfHour && start < endOfHour
       }
-      .sorted { $0.startTime! > $1.startTime! }
   }
 }
 
@@ -153,9 +192,4 @@ extension ViewModel {
       event.endTime == nil && event.startTime != nil
     }
   }
-}
-
-
-extension ViewModel {
-  
 }

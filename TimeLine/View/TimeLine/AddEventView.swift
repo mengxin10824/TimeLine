@@ -14,20 +14,20 @@ struct AddEventView: View {
   @Environment(\.dismiss) private var dismiss
   
   @EnvironmentObject var viewModel: ViewModel
-
+  
   @Bindable var event: Event
-
+  
   @State private var hasTime: Bool = false
   @State private var showErrorAlert = false
   @State private var errorMessage = ""
-
+  
   var body: some View {
     NavigationStack {
       Form {
         eventDetailsSection
         timeDetailsSection
         subEventsSection
-        prioritySection
+        deleteSection
       }
       .navigationTitle(event.title.isEmpty ? "New Event" : "Edit Event")
       .navigationBarTitleDisplayMode(.inline)
@@ -50,23 +50,37 @@ struct AddEventView: View {
   }
   
   // MARK: - View Components
-
+  
   private var eventDetailsSection: some View {
     Section("Event Detail") {
       TextField("Title", text: $event.title, prompt: Text("Enter title"))
         .lineLimit(3...5)
-          
+        .listRowBackground(Color.brown.opacity(0.3))
+
+      
       TextField("Details",
                 text: $event.details,
                 prompt: Text("Additional details"),
                 axis: .vertical)
         .lineLimit(5...10)
-          
-      Picker("Event Type", selection: $event.eventType) {
-        ForEach(viewModel.allEventTypes) { eventType in
-          Text(eventType.name).tag(eventType)
+        .listRowBackground(Color.yellow.opacity(0.3))
+
+      
+      Picker("Importance", selection: $event.importance) {
+        ForEach(0 ..< 3) { level in
+          Text(["Low", "Medium", "High"][level]).tag(level)
         }
       }
+      .listRowBackground(event.priorityColor)
+      
+      Picker("Event Type", selection: $event.eventType) {
+        ForEach(viewModel.allEventTypes) { eventType in
+          Text("\(eventType.name)")
+            .foregroundColor(eventType.color)
+            .tag(eventType)
+        }
+      }
+      .listRowBackground(event.eventType.color.opacity(0.3))
     }
   }
   
@@ -77,25 +91,31 @@ struct AddEventView: View {
         Text("Without Time").tag(false)
       }
       .pickerStyle(.segmented)
-          
+      
       if hasTime {
         DatePicker("Start Time",
                    selection: Binding(
                      get: { event.startTime ?? Date() },
-                     set: { event.startTime = $0 }),
+                     set: { event.startTime = $0 }
+                   ),
                    displayedComponents: [.date, .hourAndMinute])
-              
+        
         DatePicker("End Time",
                    selection: Binding(
                      get: { event.endTime ?? Date().addingTimeInterval(3600) },
-                     set: { event.endTime = $0 }),
+                     set: { event.endTime = $0 }
+                   ),
                    in: (event.startTime ?? Date(timeIntervalSince1970: 0))...,
                    displayedComponents: [.date, .hourAndMinute])
-              
+        
         if let duration = event.duration {
           Label("Duration", systemImage: "clock")
             .badge(duration)
         }
+      } else {
+        Text("It's an Open Event. Soon it will display on Today View.")
+          .font(.caption)
+          .foregroundStyle(.secondary)
       }
     }
   }
@@ -105,7 +125,7 @@ struct AddEventView: View {
       Button(action: addSubEvent) {
         Label("Add Sub Event", systemImage: "plus")
       }
-              
+      
       ForEach($event.subEvents) { $subEvent in
         NavigationLink {
           AddEventView(event: subEvent)
@@ -123,14 +143,13 @@ struct AddEventView: View {
     }
   }
   
-  private var prioritySection: some View {
-    Section("Priority") {
-      Picker("Importance", selection: $event.importance) {
-        ForEach(0 ..< 3) { level in
-          Text(["Low", "Medium", "High"][level]).tag(level)
-        }
+  private var deleteSection: some View {
+    Section {
+      Button("Delete Event", role: .destructive) {
+        viewModel.deleteEvent(event)
+        dismiss()
       }
-      .pickerStyle(.segmented)
+      .foregroundColor(.red)
     }
   }
   
@@ -164,7 +183,9 @@ struct AddEventView: View {
       eventType: event.eventType,
       startTime: nil,
       endTime: nil,
-      parentOfEvent: event)
+      parentOfEvent: event
+    )
+    
     event.addSubEvent(newSubEvent)
   }
   

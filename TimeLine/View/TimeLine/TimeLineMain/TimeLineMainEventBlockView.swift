@@ -21,8 +21,8 @@ struct EventBlockView: View {
     let tintColor: Color = event.eventType.color
 
     VStack {
-      VStack(alignment: .trailing, spacing: 8) {
-        EventTitleView(title: event.title, tintColor: tintColor)
+      VStack(alignment: .trailing, spacing: 5) {
+        EventTitleView(title: event.title, tintColor: tintColor, isCompleted: event.isCompleted)
         if !event.details.isEmpty {
           EventDetailsView(details: event.details, tintColor: tintColor)
         }
@@ -32,13 +32,11 @@ struct EventBlockView: View {
           SubEventsView(subEvents: event.subEvents, tintColor: tintColor)
         }
       }
+      .frame(width: 200)
       .padding(20)
       .background(tintColor.opacity(0.1))
       .background(.ultraThinMaterial)
       .clipShape(RoundedRectangle(cornerRadius: 15))
-      if !isPreview {
-        Spacer()
-      }
     }
     .background(tintColor.opacity(0.1))
     .clipShape(RoundedRectangle(cornerRadius: 15))
@@ -48,7 +46,10 @@ struct EventBlockView: View {
           Button("Edit", systemImage: "pencil") {
             modifyEvent = event
           }
-          Button("Delete", systemImage: "trash") {
+          Button(event.isCompleted ? "Incomplete" : "Complete", systemImage: event.isCompleted ? "arrow.uturn.left" : "checkmark") {
+            event.isCompleted.toggle()
+          }
+          Button("Delete", systemImage: "trash", role: .destructive) {
             
           }
         }
@@ -74,11 +75,13 @@ struct EventBlockView: View {
 struct EventTitleView: View {
   let title: String
   let tintColor: Color
+  let isCompleted: Bool
 
   var body: some View {
     Text(title)
-      .font(.system(size: 34, weight: .black))
+      .font(.system(size: 18, weight: .black))
       .foregroundColor(tintColor.opacity(0.75))
+      .strikethrough(isCompleted)
   }
 }
 
@@ -89,7 +92,7 @@ struct EventDetailsView: View {
   var body: some View {
     Text(details)
       .lineLimit(1 ... 3)
-      .font(.system(size: 26, weight: .bold))
+      .font(.system(size: 12, weight: .bold))
       .multilineTextAlignment(.trailing)
       .foregroundStyle(tintColor.opacity(0.35))
   }
@@ -105,11 +108,10 @@ struct EventInfoView: View {
       InfoItemView(label: "Priority", value: event.priorityText, tintColor: tintColor)
       InfoItemView(label: "subEvent", value: event.subEvents.count.description, tintColor: tintColor)
     }
-    .padding(15)
-    .frame(maxWidth: .infinity, maxHeight: 100)
+    .padding(.vertical, 10)
+    .frame(maxWidth: .infinity, maxHeight: 70)
     .background(tintColor.opacity(0.1))
     .clipShape(RoundedRectangle(cornerRadius: 25))
-    .padding(.vertical, 10)
   }
 
   private func priorityText(for importance: Int) -> String {
@@ -134,12 +136,12 @@ struct InfoItemView: View {
   var body: some View {
     VStack {
       Text(label)
-        .font(.system(size: 14, weight: .black))
+        .font(.system(size: 10, weight: .black))
         .foregroundColor(tintColor.opacity(0.4))
         .fixedSize()
       Spacer()
       Text(value)
-        .font(.system(size: 16, weight: .black))
+        .font(.system(size: 12, weight: .black))
         .foregroundColor(tintColor.opacity(0.5))
         .fixedSize()
     }
@@ -152,30 +154,31 @@ struct SubEventsView: View {
 
   var body: some View {
     VStack {
+      Spacer()
       ForEach(Array(subEvents.prefix(2).enumerated()), id: \.offset) { index, subEvent in
         Rectangle()
           .fill(.clear)
-          .frame(height: 2)
+          .frame(height: 1)
           .background(tintColor.opacity(0.2))
         HStack {
           Text("\(index + 1). ")
           Text(subEvent.title).lineLimit(1)
           Spacer()
         }
-        .padding(.horizontal)
       }
 
       if subEvents.count > 2 {
         Rectangle()
           .fill(.clear)
-          .frame(height: 2)
+          .frame(height: 1)
           .background(tintColor.opacity(0.2))
         Text("And More \(subEvents.count - 2) Event...")
-          .padding(.bottom)
       }
     }
-    .font(.system(size: 14, weight: .black))
+    .font(.system(size: 10, weight: .black))
     .foregroundColor(tintColor.opacity(0.3))
+    .frame(height: 50)
+    .padding(subEvents.isEmpty ? 0 : 5)
   }
 }
 
