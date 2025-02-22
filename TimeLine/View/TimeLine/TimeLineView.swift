@@ -19,6 +19,7 @@ struct TimeLineView: View {
         .environment(\.filterType, filterType)
 
       HStack {
+        Spacer()
         Button {
           isBackToNow = true
           if filterType != .none {
@@ -50,29 +51,6 @@ struct TimeLineView: View {
             Button("Filter By Priority", systemImage: "flame", action: {
               filterType = .byPriority
             })
-          }
-        }
-
-        Spacer()
-
-        Button {
-          modifyEvent = viewModel.addEvent()
-        } label: {
-          Image(systemName: "plus")
-            .font(.title)
-            .frame(width: 30, height: 30)
-            .foregroundStyle(.white)
-            .padding()
-            .background(.blue)
-            .clipShape(Circle())
-        }
-        .contextMenu {
-          Section("Quick Add By Event Type") {
-            ForEach(viewModel.allEventTypes) { eventType in
-              Button("\(eventType.name)") {
-                modifyEvent = viewModel.addEvent(eventType: eventType)
-              }
-            }
           }
         }
       }.padding(20)

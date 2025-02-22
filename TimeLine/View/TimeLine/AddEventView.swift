@@ -7,6 +7,7 @@
 
 import SwiftData
 import SwiftUI
+import Combine
 
 // Add and Edit Event
 struct AddEventView: View {
@@ -20,6 +21,8 @@ struct AddEventView: View {
   @State private var hasTime: Bool = false
   @State private var showErrorAlert = false
   @State private var errorMessage = ""
+  
+  @State private var cancellable: AnyCancellable?
   
   var body: some View {
     NavigationStack {
@@ -56,7 +59,17 @@ struct AddEventView: View {
       TextField("Title", text: $event.title, prompt: Text("Enter title"))
         .lineLimit(3...5)
         .listRowBackground(Color.brown.opacity(0.3))
-
+        .onChange(of: event.title) { _, newValue in
+          cancellable?.cancel()
+          
+          cancellable = Just(newValue)
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .sink { words in
+              if let predicateType = viewModel.predictEventType(from: words) {
+                event.eventType = predicateType
+              }
+            }
+        }
       
       TextField("Details",
                 text: $event.details,

@@ -32,7 +32,7 @@ struct TodayScrollView: View {
             ForEach(cachedHours, id: \.self) { hour in
               let events = viewModel.events(atHour: hour)
               TimeLineMainView(events: events, hour: hour)
-                .frame(width: reader.size.width * 3)
+                .frame(width: reader.size.width * 1.3)
                 .id(hour)
                 .onAppear {
                   handleAppear(hour: hour, proxy: proxy)

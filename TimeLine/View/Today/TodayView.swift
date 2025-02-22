@@ -10,7 +10,7 @@ import SwiftUI
 struct TodayView: View {
   @EnvironmentObject var viewModel: ViewModel
   
-  @State private var seletedEvent: Event?
+  @State var modifyEvent: Event?
   
   var body: some View {
     ZStack {
@@ -29,32 +29,61 @@ struct TodayView: View {
         }
         
         VStack(alignment: .leading, spacing: 15) {
-          let nowEvents = Array(viewModel.nowEvents.prefix(3))
-          HStack {
+          HStack(alignment: .bottom) {
             Text("On Going")
               .foregroundStyle(.secondary)
               .font(.system(size: 36, weight: .black))
+            Text(viewModel.nowEvents.count.description)
+              .font(.system(size: 12, weight: .bold))
+              .foregroundStyle(.secondary)
             Spacer()
           }
           
-          todayEvents(events: nowEvents)
-        }
+          todayEvents(events: viewModel.nowEvents)
+        }.frame(height: 200)
         
         VStack(alignment: .leading, spacing: 15) {
-          let openEvents = Array(viewModel.openEvents.prefix(3))
-          HStack {
+          HStack(alignment: .bottom) {
             Text("Open Event")
               .foregroundStyle(.secondary)
               .font(.system(size: 36, weight: .black))
+            Text(viewModel.openEvents.count.description)
+              .font(.system(size: 12, weight: .bold))
+              .foregroundStyle(.secondary)
             Spacer()
           }
-          todayEvents(events: openEvents)
-        }
+          todayEvents(events: viewModel.openEvents)
+        } .frame(height: 200)
 
-      }.padding()
+        HStack {
+          Spacer()
+          Button {
+            modifyEvent = viewModel.addEvent()
+          } label: {
+            Image(systemName: "plus")
+              .font(.title)
+              .frame(width: 30, height: 30)
+              .foregroundStyle(.white)
+              .padding()
+              .background(.blue)
+              .clipShape(Circle())
+          }
+          .contextMenu {
+            Section("Quick Add By Event Type") {
+              ForEach(viewModel.allEventTypes) { eventType in
+                Button("\(eventType.name)") {
+                  modifyEvent = viewModel.addEvent(eventType: eventType)
+                }
+              }
+            }
+          }
+        }
+      }
+      .padding(.bottom, 50)
+      .padding()
     }
-    .sheet(item: $seletedEvent) {
-      seletedEvent = nil
+    .sheet(item: $modifyEvent) {
+      modifyEvent = nil
     } content: { currentEvent in
       AddEventView(event: currentEvent)
     }
@@ -71,11 +100,10 @@ struct TodayView: View {
             .fontWeight(.semibold)
             .foregroundColor(.secondary)
         )
-        .frame(height: 200)
     }
     
     VStack(spacing: 5) {
-      ForEach(events) { event in
+      ForEach(Array(events.prefix(2))) { event in
         VStack(alignment: .leading, spacing: 5) {
           HStack {
             Text(event.title)
@@ -109,10 +137,42 @@ struct TodayView: View {
         .background(event.eventType.color.opacity(0.1))
         .clipShape(RoundedRectangle(cornerRadius: 25))
         .onTapGesture {
-          self.seletedEvent = event
+          self.modifyEvent = event
         }
+        .contextMenu(
+          menuItems: {
+            Section("Actions") {
+              Button("Edit", systemImage: "pencil") {
+                modifyEvent = event
+              }
+              Button(event.isCompleted ? "Incomplete" : "Complete", systemImage: event.isCompleted ? "arrow.uturn.left" : "checkmark") {
+                event.isCompleted.toggle()
+              }
+              Button("Delete", systemImage: "trash", role: .destructive) {
+                viewModel.deleteEvent(event)
+              }
+            }
+            Button("Focus Mode", systemImage: "fitness.timer") {
+              
+            }
+          },
+          preview: {
+            EventBlockView(event: event, isPreview: true)
+          }
+        )
       }
       .clipShape(RoundedRectangle(cornerRadius: 25))
+    }
+    
+    if events.count > 2 {
+      RoundedRectangle(cornerRadius: 25)
+        .fill(.gray.opacity(0.1))
+        .overlay(
+          Text("More \(events.count - 2) events")
+            .font(.title2)
+            .fontWeight(.semibold)
+            .foregroundColor(.secondary)
+        )
     }
   }
 }

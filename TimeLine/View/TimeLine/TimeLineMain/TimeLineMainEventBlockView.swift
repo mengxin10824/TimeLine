@@ -9,6 +9,8 @@ import SwiftUI
 struct EventBlockView: View {
   @State var event: Event
   @State private var modifyEvent: Event?
+  
+  @EnvironmentObject var viewModel: ViewModel
 
   let isPreview: Bool
 
@@ -26,6 +28,8 @@ struct EventBlockView: View {
         if !event.details.isEmpty {
           EventDetailsView(details: event.details, tintColor: tintColor)
         }
+        Spacer()
+        
         EventInfoView(event: event, tintColor: tintColor)
 
         if isPreview {
@@ -50,7 +54,7 @@ struct EventBlockView: View {
             event.isCompleted.toggle()
           }
           Button("Delete", systemImage: "trash", role: .destructive) {
-            
+            viewModel.deleteEvent(event)
           }
         }
         Button("Focus Mode", systemImage: "fitness.timer") {

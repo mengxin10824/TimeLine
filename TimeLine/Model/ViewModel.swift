@@ -10,12 +10,14 @@ import SwiftData
 import SwiftUI
 
 @MainActor
-@Observable
 class ViewModel: ObservableObject {
   let container: ModelContainer
   var modelContext: ModelContext
 
+  @Published
   var allEvents: [Event] = []
+  
+  @Published
   var allEventTypes: [EventType] = []
 
   private func checkAndInsertInitialData() {
@@ -44,9 +46,9 @@ class ViewModel: ObservableObject {
   }
 
   init() {
-#if !DEBUG
+#if DEBUG
     do {
-      container = try ModelContainer(for: Event.self, EventType.self)
+      container = try ModelContainer(for: Event.self, EventType.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
     } catch {
       fatalError("Failed to initialize ModelContainer: \(error)")
     }
@@ -57,7 +59,7 @@ class ViewModel: ObservableObject {
     checkAndInsertInitialData()
 #else
     do {
-      container = try ModelContainer(for: Event.self, EventType.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+      container = try ModelContainer(for: Event.self, EventType.self)
     } catch {
       fatalError("Failed to initialize ModelContainer: \(error)")
     }
@@ -117,6 +119,7 @@ class ViewModel: ObservableObject {
   
   func deleteEvent(_ event: Event) {
     do {
+      event.parentOfEvent?.subEvents.removeAll { $0 == event }
       modelContext.delete(event)
       try modelContext.save()
       fetch()
@@ -161,15 +164,22 @@ extension ViewModel {
 extension ViewModel {
   func predictEventType(from text: String) -> EventType? {
     do {
+      print("Predicting for text: \(text)")
       let config = MLModelConfiguration()
       let model = try EventClassify(configuration: config)
       let input = EventClassifyInput(text: text)
       let prediction = try model.prediction(input: input)
-
+      
+      print("Raw prediction: \(prediction)")
+      print("Predicted label: \(prediction.label)")
+      
       let eventTypeName = prediction.label.uppercased()
+      print("Looking for: \(eventTypeName)")
+      print("Available types: \(allEventTypes.map { $0.name })")
+      
       return allEventTypes.first { $0.name == eventTypeName }
     } catch {
-      print("Error predicting event type: \(error.localizedDescription)")
+      print("Prediction error: \(error)")
       return nil
     }
   }
@@ -183,13 +193,13 @@ extension ViewModel {
         guard let startTime = event.startTime, let endTime = event.endTime else {
           return false
         }
-        return startTime <= now && endTime >= now
+        return startTime <= now && endTime >= now && event.isCompleted == false
       }
   }
 
   var openEvents: [Event] {
     allEvents.filter { event in
-      event.endTime == nil && event.startTime != nil
+      event.endTime == nil || event.startTime == nil && event.isCompleted == false
     }
   }
 }
