@@ -16,7 +16,7 @@ class ViewModel: ObservableObject {
 
   @Published
   var allEvents: [Event] = []
-  
+
   @Published
   var allEventTypes: [EventType] = []
 
@@ -24,14 +24,14 @@ class ViewModel: ObservableObject {
     guard allEventTypes.isEmpty else { return }
 
     let presetTypes: [(String, Color)] = [
-        ("STUDY", Color.blue),
-        ("WORK", Color.green),
-        ("FITNESS", Color.orange),
-        ("LIFE", Color.yellow),
-        ("LEISURE", Color.purple),
-        ("SOCIAL", Color.red),
-        ("FINANCE", Color.gray),
-        ("CREATIVITY", Color.pink)
+      ("STUDY", Color.blue),
+      ("WORK", Color.green),
+      ("FITNESS", Color.orange),
+      ("LIFE", Color.yellow),
+      ("LEISURE", Color.purple),
+      ("SOCIAL", Color.red),
+      ("FINANCE", Color.gray),
+      ("CREATIVITY", Color.pink)
     ]
 
     for type in presetTypes {
@@ -46,29 +46,31 @@ class ViewModel: ObservableObject {
   }
 
   init() {
-#if DEBUG
-    do {
-      container = try ModelContainer(for: Event.self, EventType.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-    } catch {
-      fatalError("Failed to initialize ModelContainer: \(error)")
-    }
-    modelContext = ModelContext(container)
+    #if DEBUG
+      do {
+        container = try ModelContainer(for: Event.self, EventType.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+      } catch {
+        fatalError("Failed to initialize ModelContainer: \(error)")
+      }
+      modelContext = ModelContext(container)
 
-    fetch()
+      fetch()
 
-    checkAndInsertInitialData()
-#else
-    do {
-      container = try ModelContainer(for: Event.self, EventType.self)
-    } catch {
-      fatalError("Failed to initialize ModelContainer: \(error)")
-    }
-    modelContext = ModelContext(container)
+      checkAndInsertInitialData()
+    #else
+      do {
+        container = try ModelContainer(for: Event.self, EventType.self)
+      } catch {
+        fatalError("Failed to initialize ModelContainer: \(error)")
+      }
+      modelContext = ModelContext(container)
 
-    fetch()
+      fetch()
 
-    checkAndInsertInitialData()
-#endif
+      checkAndInsertInitialData()
+    #endif
+    
+    loadModel()
   }
 
   func fetch() {
@@ -116,7 +118,7 @@ class ViewModel: ObservableObject {
       print("add event type error: \(error)")
     }
   }
-  
+
   func deleteEvent(_ event: Event) {
     do {
       event.parentOfEvent?.subEvents.removeAll { $0 == event }
@@ -125,6 +127,44 @@ class ViewModel: ObservableObject {
       fetch()
     } catch {
       print("delete event error: \(error)")
+    }
+  }
+
+  private var model: EventClassify?
+
+  private func loadModel() {
+    Task {
+      do {
+        let config = MLModelConfiguration()
+        self.model = try EventClassify(configuration: config)
+      } catch {
+        print("Model loading error: \(error)")
+      }
+    }
+  }
+
+  func predictEventType(from text: String) async -> EventType? {
+    guard let model = model else {
+      // Model not yet loaded
+      return nil
+    }
+
+    do {
+      print("Predicting for text: \(text)")
+      let input = EventClassifyInput(text: text)
+      let prediction = try await model.prediction(input: input)
+
+      print("Raw prediction: \(prediction)")
+      print("Predicted label: \(prediction.label)")
+
+      let eventTypeName = prediction.label.uppercased()
+      print("Looking for: \(eventTypeName)")
+      print("Available types: \(allEventTypes.map { $0.name })")
+
+      return allEventTypes.first { $0.name == eventTypeName }
+    } catch {
+      print("Prediction error: \(error)")
+      return nil
     }
   }
 }
@@ -158,30 +198,6 @@ extension ViewModel {
         }
         return start >= startOfHour && start < endOfHour
       }
-  }
-}
-
-extension ViewModel {
-  func predictEventType(from text: String) -> EventType? {
-    do {
-      print("Predicting for text: \(text)")
-      let config = MLModelConfiguration()
-      let model = try EventClassify(configuration: config)
-      let input = EventClassifyInput(text: text)
-      let prediction = try model.prediction(input: input)
-      
-      print("Raw prediction: \(prediction)")
-      print("Predicted label: \(prediction.label)")
-      
-      let eventTypeName = prediction.label.uppercased()
-      print("Looking for: \(eventTypeName)")
-      print("Available types: \(allEventTypes.map { $0.name })")
-      
-      return allEventTypes.first { $0.name == eventTypeName }
-    } catch {
-      print("Prediction error: \(error)")
-      return nil
-    }
   }
 }
 

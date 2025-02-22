@@ -5,9 +5,9 @@
 //  Created by mengxin10824 on 2025/1/22.
 //
 
+import Combine
 import SwiftData
 import SwiftUI
-import Combine
 
 // Add and Edit Event
 struct AddEventView: View {
@@ -21,8 +21,6 @@ struct AddEventView: View {
   @State private var hasTime: Bool = false
   @State private var showErrorAlert = false
   @State private var errorMessage = ""
-  
-  @State private var cancellable: AnyCancellable?
   
   var body: some View {
     NavigationStack {
@@ -49,6 +47,15 @@ struct AddEventView: View {
       }
       .onAppear(perform: setupInitialState)
       .onChange(of: hasTime, handleTimeToggle)
+      .onChange(of: event.title) { _, newValue in
+        Task {
+          if let predicateType = await viewModel.predictEventType(from: newValue) {
+            await MainActor.run {
+              event.eventType = predicateType
+            }
+          }
+        }
+      }
     }
   }
   
@@ -57,28 +64,25 @@ struct AddEventView: View {
   private var eventDetailsSection: some View {
     Section("Event Detail") {
       TextField("Title", text: $event.title, prompt: Text("Enter title"))
-        .lineLimit(3...5)
+        .lineLimit(1)
         .listRowBackground(Color.brown.opacity(0.3))
-        .onChange(of: event.title) { _, newValue in
-          cancellable?.cancel()
-          
-          cancellable = Just(newValue)
-            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-            .sink { words in
-              if let predicateType = viewModel.predictEventType(from: words) {
-                event.eventType = predicateType
-              }
-            }
-        }
+
+//          cancellable?.cancel()
+//
+//          cancellable = Just(newValue)
+//            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+//            .sink { words in
+//
+//            }
+//        }
       
       TextField("Details",
                 text: $event.details,
                 prompt: Text("Additional details"),
                 axis: .vertical)
-        .lineLimit(5...10)
+        .lineLimit(5 ... 10)
         .listRowBackground(Color.yellow.opacity(0.3))
 
-      
       Picker("Importance", selection: $event.importance) {
         ForEach(0 ..< 3) { level in
           Text(["Low", "Medium", "High"][level]).tag(level)

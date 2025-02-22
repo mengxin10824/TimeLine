@@ -19,8 +19,7 @@ struct TodayScrollView: View {
   
   @State var currentDate: Date = .now
   
-  @Binding var isBackToNow: Bool
-  
+  @State var isBackToNow: Bool = false
   @EnvironmentObject var viewModel: ViewModel
   
  

@@ -11,7 +11,7 @@ struct TimeLineView: View {
   @Environment(\.modelContext) var modelContext
   @EnvironmentObject var viewModel: ViewModel
 
-  @State var isBackToNow: Bool = false
+  @Binding var isBackToNow: Bool
   @State var filterType: FilterType = .none
   var body: some View {
     ZStack(alignment: .bottom) {
