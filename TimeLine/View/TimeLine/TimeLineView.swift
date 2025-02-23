@@ -58,6 +58,7 @@ struct TimeLineView: View {
     }
     .sheet(item: $modifyEvent, onDismiss: {
       modifyEvent = nil
+      viewModel.fetch()
     }) { currentEvent in
       AddEventView(event: currentEvent)
     }

@@ -11,7 +11,7 @@ import TipKit
 
 @main
 struct TimeLineApp: App {
-  @StateObject var viewModel: ViewModel = .init()
+  @ObservedObject var viewModel: ViewModel = .init()
   var body: some Scene {
     WindowGroup {
       HomeView()

@@ -9,9 +9,32 @@ import SwiftData
 import SwiftUI
 
 struct TimeLineMainView: View {
-  @State var events: [Event]
   @State var hour: Date
+  var events: [Event] {
+    var allEvents = viewModel.events(atHour: hour)
+    return withAnimation(.easeInOut(duration: 0.3)) {
+      switch filterType {
+      case .byPriority:
+        allEvents.sort { $0.importance > $1.importance }
+        
+      case .byType:
+        allEvents.sort { $0.eventType.name < $1.eventType.name }
+        
+      case .byTime:
+        allEvents.sort {
+          guard let s0 = $0.startTime, let s1 = $1.startTime else { return false }
+          return s0 < s1
+        }
+
+      case .none:
+        allEvents.sort { $0.createdTime < $1.createdTime }
+      }
+      return allEvents
+    }
+  }
+  
   @Environment(\.filterType) var filterType: FilterType
+  @EnvironmentObject var viewModel: ViewModel
   
   let hourHeight: CGFloat = 200
   
@@ -29,43 +52,29 @@ struct TimeLineMainView: View {
       
       ZStack(alignment: .leading) {
         ForEach(Array(events.enumerated()), id: \.offset) { index, event in
-          EventBlockView(event: event)
-            .frame(height: self.calcEventHeight(event: event))
-            .overlay(alignment: .leading) {
-              VStack {
-                timeView(time: event.startTime).offset(y: 5)
-                Spacer()
-                timeView(time: event.endTime).offset(y: -5)
-              }
-            }
-            .offset(x: CGFloat(index * 250 + 60), y: self.calcEventOffsetY(event: event))
-            .zIndex(Double(index))
-            .transition(.move(edge: .leading))
+          VStack {
+            EventBlockView(event: event)
+              .frame(minHeight: self.calcEventHeight(event: event))
+              .overlay(alignment: .leading, content: {
+                VStack {
+                  timeView(time: event.startTime).offset(y: -15)
+                  Spacer()
+                  timeView(time: event.endTime).offset(y: 15)
+                }
+              })
+              .offset(x: CGFloat(index * 250 + 60), y: self.calcEventOffsetY(event: event))
+              .zIndex(Double(index))
+              .transition(.move(edge: .leading))
+              .fixedSize()
+              .frame(height: 0)
+          }
         }
+        
       }
-      .frame(maxWidth: .infinity, alignment: .leading)
-      .id("\(hour)-\(events.count)")
+      .id(filterType)
     }
+    .frame(maxWidth: .infinity, alignment: .leading)
     .padding(.leading, 5)
-    .onChange(of: filterType) { oldValue, newValue in
-      withAnimation(.easeInOut(duration: 0.3)) {
-        switch newValue {
-        case .byPriority:
-          events.sort { $0.importance > $1.importance }
-        case .byType:
-          events.sort { $0.eventType.name < $1.eventType.name }
-        case .byTime:
-          events.sort {
-            guard let s0 = $0.startTime, let s1 = $1.startTime else { return false }
-            return s0 < s1
-          }
-        case .none:
-          if oldValue != .none {
-            events.sort { $0.createdTime < $1.createdTime }
-          }
-        }
-      }
-    }
   }
   
   private func timeView(time: Date?) -> some View {

@@ -47,35 +47,32 @@ class ViewModel: ObservableObject {
 
   init() {
     #if DEBUG
-      do {
-        container = try ModelContainer(for: Event.self, EventType.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-      } catch {
-        fatalError("Failed to initialize ModelContainer: \(error)")
-      }
-      modelContext = ModelContext(container)
-
-      fetch()
-
-      checkAndInsertInitialData()
+    let isMemoryOnly = true
     #else
-      do {
-        container = try ModelContainer(for: Event.self, EventType.self)
-      } catch {
-        fatalError("Failed to initialize ModelContainer: \(error)")
-      }
+    let isMemoryOnly = false
+    #endif
+
+    do {
+      container = try ModelContainer(
+        for: Event.self,
+        EventType.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: isMemoryOnly)
+      )
       modelContext = ModelContext(container)
 
       fetch()
-
       checkAndInsertInitialData()
-    #endif
-    
-    loadModel()
+      loadModel()
+    } catch {
+      fatalError("Failed to initialize ModelContainer: \(error)")
+    }
   }
 
   func fetch() {
     // Fetch all events
-    let eventDescriptor = FetchDescriptor<Event>()
+    let eventDescriptor = FetchDescriptor<Event>(predicate: #Predicate {
+      $0.parentOfEvent == nil
+    })
     do {
       allEvents = try modelContext.fetch(eventDescriptor)
     } catch {
@@ -89,6 +86,8 @@ class ViewModel: ObservableObject {
     } catch {
       print("Failed to fetch event types: \(error)")
     }
+    
+    objectWillChange.send()
   }
 
   func addEvent(eventType: EventType? = nil) -> Event {
@@ -96,10 +95,9 @@ class ViewModel: ObservableObject {
       do {
         let selectedType = eventType ?? allEventTypes.first!
         let newEvent = Event(title: "", details: "", eventType: selectedType)
+        allEvents.append(newEvent)
         modelContext.insert(newEvent)
         try modelContext.save()
-        fetch()
-        objectWillChange.send()
         return newEvent
       } catch {
         print("add event error: \(error)")
@@ -114,9 +112,9 @@ class ViewModel: ObservableObject {
         name: name.uppercased(),
         hexString: color.toHex()
       )
+      allEventTypes.append(newType)
       modelContext.insert(newType)
       try modelContext.save()
-      fetch()
     } catch {
       print("add event type error: \(error)")
     }
@@ -126,9 +124,9 @@ class ViewModel: ObservableObject {
     withAnimation(.easeInOut(duration: 0.5)) {
       do {
         event.parentOfEvent?.subEvents.removeAll { $0 == event }
+        allEvents.removeAll { $0 == event }
         modelContext.delete(event)
         try modelContext.save()
-        objectWillChange.send()
         fetch()
       } catch {
         print("delete event error: \(error)")
@@ -214,10 +212,10 @@ extension ViewModel {
   var openEvents: [Event] {
     allEvents
       .filter { event in
-      event.endTime == nil || event.startTime == nil
-    }
-    .filter {
-      $0.isCompleted == false
-    }
+        event.endTime == nil || event.startTime == nil
+      }
+      .filter {
+        $0.isCompleted == false
+      }
   }
 }

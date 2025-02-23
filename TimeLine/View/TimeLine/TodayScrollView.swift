@@ -47,9 +47,8 @@ struct TodayScrollView: View {
         ScrollViewReader { proxy in
           LazyVStack(spacing: 0) {
             ForEach(cachedHours, id: \.self) { hour in
-              let events = viewModel.events(atHour: hour)
-              TimeLineMainView(events: events, hour: hour)
-                .frame(width: reader.size.width * 1.3)
+              TimeLineMainView(hour: hour)
+                .frame(minWidth: reader.size.width, maxHeight: 150)
                 .id(hour)
                 .onAppear {
                   handleAppear(hour: hour, proxy: proxy)

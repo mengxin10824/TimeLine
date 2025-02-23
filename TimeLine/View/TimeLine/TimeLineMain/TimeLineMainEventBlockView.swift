@@ -24,19 +24,20 @@ struct EventBlockView: View {
 
     VStack {
       VStack(alignment: .trailing, spacing: 5) {
-        EventTitleView(title: event.title, tintColor: tintColor, isCompleted: event.isCompleted)
-        Spacer()
-        if !event.details.isEmpty {
-          EventDetailsView(details: event.details, tintColor: tintColor)
+        VStack {
+          EventTitleView(title: event.title, tintColor: tintColor, isCompleted: event.isCompleted)
+          if !event.details.isEmpty {
+            EventDetailsView(details: event.details, tintColor: tintColor)
+          }
+          EventInfoView(event: event, tintColor: tintColor)
         }
-        Spacer()
         
-        EventInfoView(event: event, tintColor: tintColor)
-        
-        Spacer()
-        
-        if isPreview {
-          SubEventsView(subEvents: event.subEvents, tintColor: tintColor)
+        VStack {
+          Spacer()
+          
+          if isPreview {
+            SubEventsView(subEvents: event.subEvents, tintColor: tintColor)
+          }
         }
       }
       .frame(width: 200)
@@ -58,10 +59,8 @@ struct EventBlockView: View {
           }
           Button("Delete", systemImage: "trash", role: .destructive) {
             viewModel.deleteEvent(event)
+            viewModel.fetch()
           }
-        }
-        Button("Focus Mode", systemImage: "fitness.timer") {
-          
         }
       },
       preview: {
@@ -73,6 +72,7 @@ struct EventBlockView: View {
     }
     .sheet(item: $modifyEvent, onDismiss: {
       modifyEvent = nil
+      viewModel.fetch()
     }) { currentEvent in
       AddEventView(event: currentEvent)
     }
@@ -187,18 +187,4 @@ struct SubEventsView: View {
     .frame(height: 50)
     .padding(subEvents.isEmpty ? 0 : 5)
   }
-}
-
-#Preview {
-  var event: Event {
-    let event = Event(title: "Title", details: "Details", eventType: EventType(name: "STUDY", hexString: "#E34343"), importance: 1)
-    event.addSubEvent(Event(title: "1", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
-    event.addSubEvent(Event(title: "1akbhdjkasbvjdbajdbasbdjksbdkadasbjdbjksad", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
-    event.addSubEvent(Event(title: "1", details: "1", eventType: EventType(name: "STUDY", hexString: "#E34343")))
-
-    return event
-  }
-
-  EventBlockView(event: event)
-    .frame(width: 200, height: 600)
 }

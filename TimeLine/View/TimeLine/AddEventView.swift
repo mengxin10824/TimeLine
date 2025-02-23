@@ -31,7 +31,7 @@ struct AddEventView: View {
         subEventsSection
         deleteSection
       }
-      .navigationTitle(event.title.isEmpty ? "New Event" : "Edit Event")
+      .navigationTitle(event.title.isEmpty ? "New" : "Edit")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
         ToolbarItem(placement: .confirmationAction) {
@@ -53,6 +53,9 @@ struct AddEventView: View {
             }
           }
         }
+      }
+      .onDisappear {
+        print(1111)
       }
     }
   }

@@ -30,7 +30,7 @@ enum AllTips {
 
   struct HeatmapTips: Tip {
     var title: Text {
-      Text("This is based on data from the last 30 days")
+      Text("Data from the last 30 days")
     }
 
     var message: Text? {

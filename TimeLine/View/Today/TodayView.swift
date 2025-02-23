@@ -40,7 +40,8 @@ struct TodayView: View {
           }
           
           todayEvents(events: viewModel.nowEvents)
-        }.frame(height: 200)
+        }
+        .frame(idealHeight: 200)
         
         VStack(alignment: .leading, spacing: 10) {
           HStack(alignment: .bottom) {
@@ -53,7 +54,8 @@ struct TodayView: View {
             Spacer()
           }
           todayEvents(events: viewModel.openEvents)
-        } .frame(height: 200)
+        }
+        .frame(idealHeight: 200)
 
         Spacer(minLength: 0)
         
@@ -78,12 +80,13 @@ struct TodayView: View {
           }
         }
         .popoverTip(AllTips.AddTips(), arrowEdge: .bottom)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+        .frame(maxWidth: .infinity, alignment: .bottomTrailing)
       }
       .padding()
     }
     .sheet(item: $modifyEvent) {
       modifyEvent = nil
+      viewModel.fetch()
     } content: { currentEvent in
       AddEventView(event: currentEvent)
     }
@@ -153,9 +156,6 @@ struct TodayView: View {
                 viewModel.deleteEvent(event)
               }
             }
-            Button("Focus Mode", systemImage: "fitness.timer") {
-              
-            }
           },
           preview: {
             EventBlockView(event: event, isPreview: true)
@@ -175,6 +175,7 @@ struct TodayView: View {
             .fontWeight(.semibold)
             .foregroundColor(.secondary)
         )
+        .padding(.top, 10)
     }
   }
 }
