@@ -33,9 +33,6 @@ struct AddEventView: View {
       .navigationTitle(event.title.isEmpty ? "New Event" : "Edit Event")
       .navigationBarTitleDisplayMode(.inline)
       .toolbar {
-        ToolbarItem(placement: .cancellationAction) {
-          Button("Cancel") { dismiss() }
-        }
         ToolbarItem(placement: .confirmationAction) {
           Button("Save", action: saveEvent)
         }
@@ -66,15 +63,6 @@ struct AddEventView: View {
       TextField("Title", text: $event.title, prompt: Text("Enter title"))
         .lineLimit(1)
         .listRowBackground(Color.brown.opacity(0.3))
-
-//          cancellable?.cancel()
-//
-//          cancellable = Just(newValue)
-//            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
-//            .sink { words in
-//
-//            }
-//        }
       
       TextField("Details",
                 text: $event.details,
@@ -195,7 +183,7 @@ struct AddEventView: View {
   
   private func addSubEvent() {
     let newSubEvent = Event(
-      title: "New Sub Event",
+      title: "New Sub Events",
       details: "",
       eventType: event.eventType,
       startTime: nil,

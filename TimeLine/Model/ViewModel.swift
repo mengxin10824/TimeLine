@@ -92,16 +92,18 @@ class ViewModel: ObservableObject {
   }
 
   func addEvent(eventType: EventType? = nil) -> Event {
-    do {
-      let selectedType = eventType ?? allEventTypes.first!
-      let newEvent = Event(title: "New Event", details: "", eventType: selectedType)
-      modelContext.insert(newEvent)
-      try modelContext.save()
-      fetch()
-      return newEvent
-    } catch {
-      print("add event error: \(error)")
-      fatalError()
+    withAnimation(.easeInOut(duration: 0.5)) {
+      do {
+        let selectedType = eventType ?? allEventTypes.first!
+        let newEvent = Event(title: "", details: "", eventType: selectedType)
+        modelContext.insert(newEvent)
+        try modelContext.save()
+        fetch()
+        return newEvent
+      } catch {
+        print("add event error: \(error)")
+        fatalError()
+      }
     }
   }
 
@@ -120,13 +122,15 @@ class ViewModel: ObservableObject {
   }
 
   func deleteEvent(_ event: Event) {
-    do {
-      event.parentOfEvent?.subEvents.removeAll { $0 == event }
-      modelContext.delete(event)
-      try modelContext.save()
-      fetch()
-    } catch {
-      print("delete event error: \(error)")
+    withAnimation(.easeInOut(duration: 0.5)) {
+      do {
+        event.parentOfEvent?.subEvents.removeAll { $0 == event }
+        modelContext.delete(event)
+        try modelContext.save()
+        fetch()
+      } catch {
+        print("delete event error: \(error)")
+      }
     }
   }
 
@@ -170,17 +174,6 @@ class ViewModel: ObservableObject {
 }
 
 extension ViewModel {
-  func fetchLateEvent() -> Int? {
-    let now = Date()
-    return allEvents
-      .filter {
-        $0.endTime != nil && $0.endTime! < now
-      }
-      .count
-  }
-}
-
-extension ViewModel {
   func events(atHour date: Date) -> [Event] {
     let calendar = Calendar.current
     guard let startOfHour = calendar.date(
@@ -211,11 +204,18 @@ extension ViewModel {
         }
         return startTime <= now && endTime >= now && event.isCompleted == false
       }
+      .filter {
+        $0.isCompleted == false
+      }
   }
 
   var openEvents: [Event] {
-    allEvents.filter { event in
-      event.endTime == nil || event.startTime == nil && event.isCompleted == false
+    allEvents
+      .filter { event in
+      event.endTime == nil || event.startTime == nil
+    }
+    .filter {
+      $0.isCompleted == false
     }
   }
 }

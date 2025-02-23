@@ -16,7 +16,7 @@ struct TodayView: View {
     ZStack {
       BackgroundView().ignoresSafeArea()
       
-      VStack(alignment: .leading, spacing: 30) {
+      VStack(alignment: .leading, spacing: 15) {
         HStack(alignment: .bottom) {
           Text("Today")
             .font(.system(size: 48, weight: .black))
@@ -28,7 +28,7 @@ struct TodayView: View {
             .foregroundStyle(.secondary)
         }
         
-        VStack(alignment: .leading, spacing: 15) {
+        VStack(alignment: .leading, spacing: 10) {
           HStack(alignment: .bottom) {
             Text("On Going")
               .foregroundStyle(.secondary)
@@ -42,7 +42,7 @@ struct TodayView: View {
           todayEvents(events: viewModel.nowEvents)
         }.frame(height: 200)
         
-        VStack(alignment: .leading, spacing: 15) {
+        VStack(alignment: .leading, spacing: 10) {
           HStack(alignment: .bottom) {
             Text("Open Event")
               .foregroundStyle(.secondary)
@@ -55,6 +55,8 @@ struct TodayView: View {
           todayEvents(events: viewModel.openEvents)
         } .frame(height: 200)
 
+        Spacer(minLength: 0)
+        
         HStack {
           Spacer()
           Button {
@@ -79,7 +81,6 @@ struct TodayView: View {
           }
         }
       }
-      .padding(.bottom, 50)
       .padding()
     }
     .sheet(item: $modifyEvent) {
@@ -162,6 +163,7 @@ struct TodayView: View {
         )
       }
       .clipShape(RoundedRectangle(cornerRadius: 25))
+      .transition(.move(edge: .leading).combined(with: .opacity))
     }
     
     if events.count > 2 {

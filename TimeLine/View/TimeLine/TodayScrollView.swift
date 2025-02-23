@@ -14,15 +14,33 @@ struct TodayScrollView: View {
   @State private var isLoadingUp = false
   @State private var isLoadingDown = false
   
-  @State private var cachedHours: [Date] = []
+  @State private var cachedHours: [Date]
   @State private var visibleHours = Set<Date>()
   
   @State var currentDate: Date = .now
   
-  @State var isBackToNow: Bool = false
+  @Binding var isBackToNow: Bool
   @EnvironmentObject var viewModel: ViewModel
   
- 
+  init(isBackToNow: Binding<Bool>) {
+      self._isBackToNow = isBackToNow
+      
+      let todayStart = calendar.startOfDay(for: .now)
+      var dates: [Date] = []
+      
+      for dayOffset in -1...1 {
+        let newDayStart = calendar.date(byAdding: .day, value: dayOffset, to: todayStart)!
+          
+        for hour in 0..<hoursPerDay {
+          if let newDate = calendar.date(byAdding: .hour, value: hour, to: newDayStart) {
+            dates.append(newDate)
+          }
+        }
+      }
+
+    self.cachedHours = dates
+  }
+  
   var body: some View {
     GeometryReader { reader in
       ScrollView([.horizontal, .vertical]) {
@@ -61,104 +79,82 @@ struct TodayScrollView: View {
       .navigationTitle(currentDate.toPinnedViewString())
       .navigationBarTitleDisplayMode(.inline)
     }
-    .onAppear {
-      let todayStart = calendar.startOfDay(for: .now)
-      var dates: [Date] = []
-            
-      for hour in 0..<hoursPerDay {
-        if let newDate = calendar.date(byAdding: .hour, value: hour, to: todayStart) {
-          dates.append(newDate)
-        }
-      }
-//      for dayOffset in -1 ... 1 {
-//        guard let dayStart = calendar.date(byAdding: .day, value: dayOffset, to: todayStart) else { continue
-//        }
-//              
-//        for hour in 0..<hoursPerDay {
-//          if let newDate = calendar.date(byAdding: .hour, value: hour, to: dayStart) {
-//            dates.append(newDate)
-//          }
-//        }
-//      }
-      DispatchQueue.global(qos: .userInitiated).async {
-        DispatchQueue.main.async {
-          self.cachedHours = dates
-        }
-      }
-    }
   }
   
   private func handleAppear(hour: Date, proxy: ScrollViewProxy) {
-      visibleHours.insert(hour)
-      currentDate = hour
+    visibleHours.insert(hour)
+    currentDate = hour
       
-      if let firstCached = cachedHours.first, hour == firstCached && !isLoadingUp {
-          loadMoreUp(proxy: proxy)
-      }
+    if let firstCached = cachedHours.first, hour == firstCached && !isLoadingUp {
+      loadMoreUp(proxy: proxy)
+    }
       
-      if let lastCached = cachedHours.last, hour == lastCached && !isLoadingDown {
-          loadMoreDown(proxy: proxy)
-      }
+    if let lastCached = cachedHours.last, hour == lastCached && !isLoadingDown {
+      loadMoreDown(proxy: proxy)
+    }
   }
   
   private func loadMoreUp(proxy: ScrollViewProxy) {
-      guard !isLoadingUp else { return }
-      isLoadingUp = true
+    guard !isLoadingUp else { return }
+    isLoadingUp = true
       
-      guard let originalFirstHour = cachedHours.first else {
-          isLoadingUp = false
-          return
+    guard let originalFirstHour = cachedHours.first else {
+      isLoadingUp = false
+      return
+    }
+      
+    let newDayStart = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: originalFirstHour))!
+    var newHours: [Date] = []
+      
+    for hour in 0..<hoursPerDay {
+      if let newDate = calendar.date(byAdding: .hour, value: hour, to: newDayStart) {
+        newHours.append(newDate)
       }
+    }
       
-      let newDayStart = calendar.date(byAdding: .day, value: -1, to: calendar.startOfDay(for: originalFirstHour))!
-      var newHours: [Date] = []
-      
-      for hour in 0..<hoursPerDay {
-          if let newDate = calendar.date(byAdding: .hour, value: hour, to: newDayStart) {
-              newHours.append(newDate)
-          }
+    DispatchQueue.main.async {
+      cachedHours.insert(contentsOf: newHours, at: 0)
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+        proxy.scrollTo(originalFirstHour, anchor: .top)
       }
-      
-      DispatchQueue.main.async {
-          cachedHours.insert(contentsOf: newHours, at: 0)
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-              proxy.scrollTo(originalFirstHour, anchor: .top)
-          }
-          isLoadingUp = false
-      }
+      isLoadingUp = false
+    }
   }
   
   private func loadMoreDown(proxy: ScrollViewProxy) {
-      guard !isLoadingDown else { return }
-      isLoadingDown = true
+    guard !isLoadingDown else { return }
+    isLoadingDown = true
       
-      guard let originalLastHour = cachedHours.last else {
-          isLoadingDown = false
-          return
+    guard let originalLastHour = cachedHours.last else {
+      isLoadingDown = false
+      return
+    }
+      
+    let newDayStart = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: originalLastHour))!
+    var newHours: [Date] = []
+      
+    for hour in 0..<hoursPerDay {
+      if let newDate = calendar.date(byAdding: .hour, value: hour, to: newDayStart) {
+        newHours.append(newDate)
       }
+    }
       
-      let newDayStart = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: originalLastHour))!
-      var newHours: [Date] = []
-      
-      for hour in 0..<hoursPerDay {
-          if let newDate = calendar.date(byAdding: .hour, value: hour, to: newDayStart) {
-              newHours.append(newDate)
-          }
-      }
-      
-      DispatchQueue.main.async {
-          cachedHours.append(contentsOf: newHours)
-          isLoadingDown = false
-      }
+    DispatchQueue.main.async {
+      cachedHours.append(contentsOf: newHours)
+      isLoadingDown = false
+    }
   }
+
   private func scrollToCurrentHour(proxy: ScrollViewProxy, animation: Animation? = nil) {
     let currentHour = calendar.dateComponents([.hour], from: Date()).hour!
     if let targetHour = cachedHours.first(where: {
       calendar.component(.hour, from: $0) == currentHour &&
         calendar.isDate($0, inSameDayAs: Date())
     }) {
-      withAnimation(animation) {
-        proxy.scrollTo(targetHour, anchor: .leading)
+      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+        withAnimation(animation) {
+          proxy.scrollTo(targetHour, anchor: .leading)
+        }
       }
     }
   }

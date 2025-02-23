@@ -83,7 +83,7 @@ struct ExportToPhoto: View {
     ZStack {
       ZStack(alignment: .top) {
         AboveShape()
-          .fill(tintColor.opacity(0.8))
+          .fill(tintColor.opacity(0.6))
 
         VStack(alignment: .center) {
           HeatMapView(data: data, tintColor: tintColor)
@@ -115,19 +115,19 @@ struct ExportToPhoto: View {
       }.frame(width: 600)
 
       ZStack {
-        BelowShape().fill(secondaryTintColor.opacity(0.8))
+        BelowShape().fill(secondaryTintColor.opacity(0.6))
 
         VStack {
           VStack(alignment: .trailing) {
             HStack(alignment: .lastTextBaseline) {
-              Text("TASKS")
+              Text("Events")
                 .font(.system(size: 32, weight: .black))
 
               Text(tasks.description)
                 .font(.system(size: 84, weight: .black))
             }
 
-            Text("All Completed Tasks")
+            Text("All Created Tasks")
               .font(.system(size: 55, weight: .black))
               .fixedSize()
               .offset(y: 50)
@@ -140,6 +140,7 @@ struct ExportToPhoto: View {
         }
       }
     }
+    .foregroundStyle(.white)
     .frame(width: 600, height: 800)
   }
 
@@ -150,7 +151,7 @@ struct ExportToPhoto: View {
         .font(.system(size: 32, weight: .black))
       Text("TimeLine")
         .font(.system(size: 40, weight: .black))
-    }
+    }.foregroundStyle(.black.opacity(0.1))
   }
 }
 
