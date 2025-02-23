@@ -33,9 +33,9 @@ struct TimeLineMainView: View {
             .frame(height: self.calcEventHeight(event: event))
             .overlay(alignment: .leading) {
               VStack {
-                timeView(time: event.startTime)
+                timeView(time: event.startTime).offset(y: 5)
                 Spacer()
-                timeView(time: event.endTime)
+                timeView(time: event.endTime).offset(y: -5)
               }
             }
             .offset(x: CGFloat(index * 250 + 60), y: self.calcEventOffsetY(event: event))
@@ -44,6 +44,7 @@ struct TimeLineMainView: View {
         }
       }
       .frame(maxWidth: .infinity, alignment: .leading)
+      .id("\(hour)-\(events.count)")
     }
     .padding(.leading, 5)
     .onChange(of: filterType) { oldValue, newValue in

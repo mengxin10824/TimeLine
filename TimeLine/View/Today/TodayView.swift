@@ -57,29 +57,28 @@ struct TodayView: View {
 
         Spacer(minLength: 0)
         
-        HStack {
-          Spacer()
-          Button {
-            modifyEvent = viewModel.addEvent()
-          } label: {
-            Image(systemName: "plus")
-              .font(.title)
-              .frame(width: 30, height: 30)
-              .foregroundStyle(.white)
-              .padding()
-              .background(.blue)
-              .clipShape(Circle())
-          }
-          .contextMenu {
-            Section("Quick Add By Event Type") {
-              ForEach(viewModel.allEventTypes) { eventType in
-                Button("\(eventType.name)") {
-                  modifyEvent = viewModel.addEvent(eventType: eventType)
-                }
+        Button {
+          modifyEvent = viewModel.addEvent()
+        } label: {
+          Image(systemName: "plus")
+            .font(.title)
+            .frame(width: 30, height: 30)
+            .foregroundStyle(.white)
+            .padding()
+            .background(.blue)
+            .clipShape(Circle())
+        }
+        .contextMenu {
+          Section("Quick Add By Event Type") {
+            ForEach(viewModel.allEventTypes) { eventType in
+              Button("\(eventType.name)") {
+                modifyEvent = viewModel.addEvent(eventType: eventType)
               }
             }
           }
         }
+        .popoverTip(AllTips.AddTips(), arrowEdge: .bottom)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
       }
       .padding()
     }
@@ -110,6 +109,7 @@ struct TodayView: View {
             Text(event.title)
               .font(.title2)
               .fontWeight(.bold)
+              .strikethrough(event.isCompleted)
               
             Spacer()
               

@@ -99,6 +99,7 @@ class ViewModel: ObservableObject {
         modelContext.insert(newEvent)
         try modelContext.save()
         fetch()
+        objectWillChange.send()
         return newEvent
       } catch {
         print("add event error: \(error)")
@@ -127,6 +128,7 @@ class ViewModel: ObservableObject {
         event.parentOfEvent?.subEvents.removeAll { $0 == event }
         modelContext.delete(event)
         try modelContext.save()
+        objectWillChange.send()
         fetch()
       } catch {
         print("delete event error: \(error)")

@@ -53,6 +53,7 @@ struct TimeLineView: View {
             })
           }
         }
+        .popoverTip(AllTips.FilterTips())
       }.padding(20)
     }
     .sheet(item: $modifyEvent, onDismiss: {

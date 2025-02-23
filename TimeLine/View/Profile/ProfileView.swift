@@ -33,6 +33,8 @@ struct ProfileView: View {
               }
               Text("Based on the data of the last 30 days")
             }
+            .popoverTip(AllTips.HeatmapTips())
+
           
           Label {
             Text("All Tasks")

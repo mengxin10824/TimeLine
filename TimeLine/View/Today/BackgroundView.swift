@@ -60,7 +60,7 @@ struct BackgroundView: View {
             
       for x in 0..<Int(size.width) {
         for y in 0..<Int(size.height) {
-          // P
+          // P = 0.9
           let shouldDrawNoise = Double.random(in: 0...1) > 0.9
           if shouldDrawNoise {
             let grayValue = CGFloat.random(in: 0...1)

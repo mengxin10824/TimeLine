@@ -8,6 +8,7 @@
 import Combine
 import SwiftData
 import SwiftUI
+import TipKit
 
 // Add and Edit Event
 struct AddEventView: View {
@@ -86,6 +87,8 @@ struct AddEventView: View {
         }
       }
       .listRowBackground(event.eventType.color.opacity(0.3))
+      
+      TipView(AllTips.EventTypePredictionTips())
     }
   }
   

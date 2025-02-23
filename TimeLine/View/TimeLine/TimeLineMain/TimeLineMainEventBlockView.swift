@@ -25,13 +25,16 @@ struct EventBlockView: View {
     VStack {
       VStack(alignment: .trailing, spacing: 5) {
         EventTitleView(title: event.title, tintColor: tintColor, isCompleted: event.isCompleted)
+        Spacer()
         if !event.details.isEmpty {
           EventDetailsView(details: event.details, tintColor: tintColor)
         }
         Spacer()
         
         EventInfoView(event: event, tintColor: tintColor)
-
+        
+        Spacer()
+        
         if isPreview {
           SubEventsView(subEvents: event.subEvents, tintColor: tintColor)
         }

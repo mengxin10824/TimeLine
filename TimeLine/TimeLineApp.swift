@@ -11,19 +11,20 @@ import TipKit
 
 @main
 struct TimeLineApp: App {
-  @StateObject var viewModel: ViewModel = ViewModel()
+  @StateObject var viewModel: ViewModel = .init()
   var body: some Scene {
     WindowGroup {
       HomeView()
         .environmentObject(viewModel)
         .modelContainer(viewModel.container)
+        .task {
+          try? Tips.configure([
+            .displayFrequency(.immediate),
+            .datastoreLocation(.applicationDefault)
+          ])
+        }
     }
   }
-}
-
-
-struct TipDemo: Tip {
-  var title: Text
 }
 
 #Preview(body: {
@@ -31,4 +32,12 @@ struct TipDemo: Tip {
   HomeView()
     .environmentObject(viewModel)
     .modelContainer(viewModel.container)
+    .task {
+      try? Tips.resetDatastore()
+
+      try? Tips.configure([
+        .displayFrequency(.immediate),
+        .datastoreLocation(.applicationDefault)
+      ])
+    }
 })
